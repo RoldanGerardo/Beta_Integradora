@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Paleta oficial BETA v4 ─────────────────────────────────────
+   Fondos claros cálidos + acentos vibrantes
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  /* Paleta 1 – Cálidos amarillos/azules (base UI) */
+  --beta-parchment:       #F4EDEA;   /* fondo sidebar */
+  --beta-lemon:           #FFFACB;   /* fondo hero/main */
+  --beta-bumblebee:       #FABE0B;   /* acento primario amarillo */
+  --beta-batch-blue:      #668EA5;   /* azul grisáceo – textos secundarios */
+  --beta-delicate-blue:   #BDE2F2;   /* azul claro – fondos de stats y círculo 1 */
+  --beta-buckthorn:       #AE6D21;   /* marrón dorado – labels, hover */
+
+  /* Paleta 2 – Naturaleza (verdes) */
+  --beta-frosted-mint:    #E6FBDA;   /* círculo 3, fondos suaves */
+  --beta-moss:            #84D175;   /* verde medio */
+  --beta-young-leaves:    #B3C56E;   /* verde oliva */
+  --beta-gretna:          #707D4E;   /* verde oscuro – texto sobre verde */
+
+  /* Paleta 3 – Naranjas energía */
+  --beta-mandarin:        #F8910C;   /* badge, hover cta */
+
+  /* Base oscuro */
+  --beta-deep-space:      #12263A;   /* texto principal, fondo dark elements */
+
+  /* Electric Sapphire (logo / bird) */
+  --beta-sapphire:        #405FFA;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--beta-parchment);
+  color: var(--beta-deep-space);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar sutil */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(18,38,58,0.14); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(250,190,11,0.45); }
