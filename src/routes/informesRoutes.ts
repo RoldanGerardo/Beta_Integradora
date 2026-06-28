@@ -6,7 +6,7 @@ const manager = new MovimientoManager();
 
 // get para tener el informe dependiento del rfago de la gecha
 router.get("/", (req, res) => {
-    // Tomamos las fechas que el Frontend nos envíe en la URL
+    // Tomamos las fechas que el frontend envie en la URL
     const fechaInicio = req.query.inicio as string;
     const fechaFin = req.query.fin as string;
 

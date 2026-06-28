@@ -6,7 +6,6 @@ import MovimientoManager from "../services/movimientosManager";
 const router = Router();
 const manager = new MovimientoManager();
 
-// GET /movimientos
 // GET: Obtener todos
 router.get("/", (req, res) => {
     res.json(manager.obtenerMovimientos());
@@ -14,7 +13,6 @@ router.get("/", (req, res) => {
 
 // POST: Registrar nuevo
 router.post("/", (req, res) => {
-    // Definimos el tipo aquí mismo para que TypeScript no de error
     const data = req.body as { monto: number, descripcion: string, fecha: string, tipo: string };
     
     const { monto, descripcion, fecha, tipo } = data;
@@ -30,7 +28,7 @@ router.post("/", (req, res) => {
     res.status(201).json({ mensaje: "Movimiento registrado", movimiento: nuevoMovimiento });
 });
 
-// DELETE: Eliminar por ID
+// DELETE para eliminar por ID
 router.delete("/:id", (req, res) => {
     const id = Number(req.params.id);
     manager.eliminarMovimiento(id);
