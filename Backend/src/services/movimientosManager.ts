@@ -26,4 +26,28 @@ export default class MovimientoManager {
     eliminarMovimiento(id: number) {
         this.movimientos = this.movimientos.filter(mov => mov.getId() !== id);
     }
+    obtenerResumen(fechaInicio: string, fechaFin: string) {
+        // Filtramos los movimientos que caen entre las fechas indicadas
+        const filtrados = this.movimientos.filter(mov => 
+            mov.getFecha() >= fechaInicio && mov.getFecha() <= fechaFin
+        );
+
+        let totalIngresos = 0;
+        let totalEgresos = 0;
+
+        filtrados.forEach(mov => {
+            if (mov instanceof Ingreso) {
+                totalIngresos += mov.getMonto();
+            } else if (mov instanceof Egreso) {
+                totalEgresos += mov.getMonto();
+            }
+        });
+
+        return {
+            ingresosTotales: totalIngresos,
+            egresosTotales: totalEgresos,
+            diferencia: totalIngresos - totalEgresos, // Lo que sobró o faltó
+            movimientosDelPeriodo: filtrados
+        };
+    }
 }
