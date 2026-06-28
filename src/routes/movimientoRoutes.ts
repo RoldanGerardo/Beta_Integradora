@@ -36,5 +36,4 @@ router.delete("/:id", (req, res) => {
     manager.eliminarMovimiento(id);
     res.json({ mensaje: "Movimiento eliminado correctamente" });
 });
-
 export default router;
