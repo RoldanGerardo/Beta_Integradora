@@ -1,13 +1,12 @@
 /* ─────────────────────────────────────────────────
    src/Components/Sidebar.tsx
-   Sidebar desplegable:
-     - Logo oficial (BetaLogo)
-     - Ilustración SVG intercambiable (SidebarIllu)
-     - Navegación con tooltip al colapsar
-     - CTA "Crear cuenta"
    ───────────────────────────────────────────────── */
 import { useState } from "react";
-import { Home, Users, Mail, ChevronLeft, UserPlus } from "lucide-react";
+import {
+  Home, Mail, ChevronLeft, LogIn, UserPlus,
+  Settings, FileText, PieChart, Info,
+  BookOpen, Activity, Bell, LogOut,
+} from "lucide-react";
 import BetaLogo from "./BetaLogo";
 
 type SidebarProps = {
@@ -15,235 +14,330 @@ type SidebarProps = {
   cambiarVista: (vista: string) => void;
 };
 
-const navLinks = [
-  { id: "casa",     label: "Casa",        Icon: Home  },
-  { id: "acerca",   label: "Acerca de",   Icon: Users },
-  { id: "contacto", label: "Contáctanos", Icon: Mail  },
-];
-
-/* ── Ilustración del sidebar ──────────────────────────────────────
+/* ── Ilustración SVG sidebar público ─────────────────────────
    Gráfica de barras colorida con pajarito BETA volando.
-   Para reemplazar con una imagen real:
-     <img src="/assets/sidebar-illu.png" alt="" className="w-full h-full object-cover" />
-   ─────────────────────────────────────────────────────────────── */
+   Para reemplazar: <img src="/assets/sidebar-illu.png" ... />
+   ─────────────────────────────────────────────────────────── */
 function SidebarIllu() {
   return (
-    <svg
-      viewBox="0 0 240 192"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full block"
-      aria-hidden="true"
-    >
-      <rect width="240" height="192" fill="#F4EDEA" />
+    <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-full" aria-hidden="true">
+      <rect width="200" height="160" fill="#F4EDEA" />
       {/* Cielo suave */}
-      <rect width="240" height="100" fill="#BDE2F2" opacity=".22" />
+      <rect width="200" height="80" fill="#BDE2F2" opacity=".20" />
       {/* Sol */}
-      <circle cx="195" cy="38" r="22" fill="#FABE0B" opacity=".18" />
-      <circle cx="195" cy="38" r="14" fill="#FABE0B" opacity=".32" />
+      <circle cx="168" cy="28" r="18" fill="#FABE0B" opacity=".22" />
+      <circle cx="168" cy="28" r="11" fill="#FABE0B" opacity=".40" />
       {/* Nubes */}
-      <ellipse cx="55" cy="32" rx="22" ry="10" fill="white" opacity=".55" />
-      <ellipse cx="72" cy="28" rx="16" ry="9" fill="white" opacity=".45" />
-      <ellipse cx="155" cy="22" rx="18" ry="8" fill="white" opacity=".38" />
-      {/* Barras (colores de la paleta BETA) */}
+      <ellipse cx="42" cy="24" rx="18" ry="8" fill="white" opacity=".60" />
+      <ellipse cx="56" cy="20" rx="13" ry="7" fill="white" opacity=".50" />
+      <ellipse cx="118" cy="18" rx="14" ry="6" fill="white" opacity=".40" />
+      {/* Barras */}
       {[
-        { x: 36,  h: 52, y: 110, color: "#BDE2F2" },
-        { x: 62,  h: 66, y: 96,  color: "#FABE0B" },
-        { x: 88,  h: 80, y: 82,  color: "#26CBD1" },
-        { x: 114, h: 62, y: 100, color: "#84D175" },
-        { x: 140, h: 88, y: 74,  color: "#F8910C" },
-        { x: 166, h: 72, y: 90,  color: "#668EA5" },
-        { x: 192, h: 54, y: 108, color: "#FABE0B" },
+        { x:22,  h:44, y:90,  c:"#BDE2F2" },
+        { x:44,  h:56, y:78,  c:"#FABE0B" },
+        { x:66,  h:68, y:66,  c:"#26CBD1" },
+        { x:88,  h:50, y:84,  c:"#84D175" },
+        { x:110, h:74, y:60,  c:"#F8910C" },
+        { x:132, h:60, y:74,  c:"#668EA5" },
+        { x:154, h:46, y:88,  c:"#FABE0B" },
       ].map((b) => (
-        <rect key={b.x} x={b.x} y={b.y} width="18" height={b.h} rx="4" fill={b.color} />
+        <rect key={b.x} x={b.x} y={b.y} width="16" height={b.h} rx="4" fill={b.c} />
       ))}
       {/* Línea base */}
-      <line x1="28" y1="164" x2="218" y2="164" stroke="#12263A" strokeWidth="1" opacity=".10" />
+      <line x1="16" y1="136" x2="178" y2="136"
+        stroke="#12263A" strokeWidth="1" opacity=".08" />
       {/* Línea de tendencia */}
       <polyline
-        points="45,128 71,106 97,90 123,110 149,82 175,98 201,115"
+        points="30,110 52,90 74,76 96,96 118,66 140,82 162,100"
         fill="none" stroke="#F8910C" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round" opacity=".65"
-      />
-      {/* Puntos de la línea */}
-      {[
-        [45,128],[71,106],[97,90],[123,110],[149,82],[175,98]
-      ].map(([cx,cy],i) => (
-        <circle key={i} cx={cx} cy={cy} r="3.5" fill="#F8910C" />
+        strokeLinecap="round" strokeLinejoin="round" opacity=".70" />
+      {[[30,110],[52,90],[74,76],[96,96],[118,66],[140,82]].map(([cx,cy],i) => (
+        <circle key={i} cx={cx} cy={cy} r="3" fill="#F8910C" />
       ))}
-      {/* Pajarito BETA volando */}
-      <g transform="translate(100,46) rotate(-12)">
-        <path d="M0 0 C-8 -5 -16 -3 -18 2 C-14 0 -10 1 -8 4 Z" fill="#405FFA" />
-        <path d="M0 0 C-6 -2 -10 0 -8 4 Z" fill="#6B83FB" opacity=".7" />
-        <circle cx="3" cy="-1" r="3.5" fill="#405FFA" />
-        <path d="M5 -2 L9 -1 L5 0Z" fill="#12263A" />
+      {/* Pajarito BETA */}
+      <g transform="translate(80,38) rotate(-10)">
+        <path d="M0 0 C-7 -4 -13 -2 -15 2 C-11 0 -8 1 -6 3 Z" fill="#405FFA" />
+        <path d="M0 0 C-5 -2 -8 0 -6 3 Z" fill="#6B83FB" opacity=".7" />
+        <circle cx="2.5" cy="-1" r="3" fill="#405FFA" />
+        <path d="M4 -1.5 L7.5 -0.5 L4 0.5Z" fill="#12263A" />
       </g>
-      {/* Monedas flotantes */}
-      <circle cx="68" cy="54" r="7" fill="#FABE0B" opacity=".70" />
-      <text x="68" y="58" textAnchor="middle" fontSize="8" fontWeight="700" fill="#AE6D21">$</text>
-      <circle cx="172" cy="44" r="5.5" fill="#84D175" opacity=".65" />
-      <text x="172" y="48" textAnchor="middle" fontSize="7" fontWeight="700" fill="#707D4E">$</text>
-      {/* Etiqueta inferior */}
-      <rect x="76" y="170" width="88" height="16" rx="4" fill="#12263A" opacity=".05" />
-      <text
-        x="120" y="181" textAnchor="middle"
-        fontFamily="Space Grotesk,sans-serif" fontSize="9" fontWeight="600"
-        fill="#12263A" opacity=".40"
-      >
+      {/* Monedas */}
+      <circle cx="52" cy="44" r="6" fill="#FABE0B" opacity=".75" />
+      <text x="52" y="48" textAnchor="middle" fontSize="7"
+        fontWeight="700" fill="#AE6D21">$</text>
+      <circle cx="140" cy="36" r="5" fill="#84D175" opacity=".70" />
+      <text x="140" y="40" textAnchor="middle" fontSize="6"
+        fontWeight="700" fill="#707D4E">$</text>
+      {/* Label */}
+      <text x="100" y="150" textAnchor="middle"
+        fontFamily="Space Grotesk,sans-serif" fontSize="8"
+        fontWeight="600" fill="#12263A" opacity=".35">
         balance mensual
       </text>
     </svg>
   );
 }
 
-export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+/* ── Ilustración mini para sidebar colapsado ───────────────── */
+function MiniIllu() {
+  return (
+    <div className="flex flex-col items-center gap-1 py-3">
+      {["#FABE0B","#26CBD1","#84D175","#F8910C"].map((c, i) => (
+        <div key={i} className="w-7 rounded-full"
+          style={{ height: 6 + i * 3, background: c, opacity: .75 }} />
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR DASHBOARD (usuario logueado)
+   ══════════════════════════════════════════════════════════════ */
+function SidebarDashboard({
+  collapsed, setCollapsed, cambiarVista,
+}: {
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  cambiarVista: (v: string) => void;
+}) {
+  const menuItems = [
+    { label: "Inicio",           Icon: Home,      color: "#405FFA", sub: [] },
+    { label: "Movimientos",      Icon: Activity,  color: "#84D175",
+      sub: ["Ingresos","Egresos","Balance"] },
+    { label: "Módulo educativo", Icon: BookOpen,  color: "#FABE0B",
+      sub: ["Cuestionarios","Artículos"] },
+    { label: "Reportes",         Icon: PieChart,  color: "#F8910C",
+      sub: ["Quincenales","Mensuales"] },
+    { label: "Contáctanos",      Icon: Mail,      color: "#668EA5", sub: [] },
+    { label: "Acerca de",        Icon: Info,      color: "#668EA5", sub: [] },
+  ];
+
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out"
+      className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out h-screen relative"
       style={{
         width: collapsed ? "66px" : "240px",
         background: "#F4EDEA",
         borderRight: "1px solid rgba(18,38,58,0.08)",
+        fontFamily: "'Inter',sans-serif",
       }}
     >
-      {/* ── Header: Logo + toggle ── */}
-      <div className="flex items-center gap-2 px-3 pt-3.5 pb-0">
-        <div className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden">
-          <BetaLogo size={36} />
-          <div
-            className="overflow-hidden transition-all duration-300 whitespace-nowrap"
-            style={{ maxWidth: collapsed ? 0 : 140, opacity: collapsed ? 0 : 1 }}
-          >
-            <div
-              className="font-['Space_Grotesk'] text-[14px] font-bold tracking-tight leading-tight"
-              style={{ color: "#12263A" }}
-            >
+      {/* Header */}
+      <div className="flex items-center justify-between p-3.5 min-h-[60px]">
+        {!collapsed && (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <BetaLogo size={30} />
+            <div className="font-['Space_Grotesk'] text-[13px] font-bold text-[#12263A] leading-tight whitespace-nowrap">
               BETA
-            </div>
-            <div className="text-[10px]" style={{ color: "#668EA5" }}>
-              Finanzas para jóvenes
+              <div className="text-[10px] font-normal text-[#668EA5]">Finanzas para jóvenes</div>
             </div>
           </div>
-        </div>
+        )}
+        {collapsed && <BetaLogo size={28} />}
         <button
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
-          className="flex-shrink-0 w-[26px] h-[26px] rounded-[7px] flex items-center justify-center transition-colors duration-150"
-          style={{
-            border: "1px solid rgba(18,38,58,0.12)",
-            background: "rgba(18,38,58,0.04)",
-            color: "#668EA5",
-          }}
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-1.5 rounded-lg hover:bg-black/5 text-[#668EA5] flex-shrink-0 transition-colors"
         >
           <ChevronLeft
-            size={14}
-            style={{
-              transform: collapsed ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.3s",
-            }}
+            size={15}
+            style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform .3s" }}
           />
         </button>
       </div>
 
-      {/* ── Ilustración ── */}
-      <div className="h-[192px] overflow-hidden flex-shrink-0">
-        <SidebarIllu />
-      </div>
-
-      {/* ── Navegación ── */}
-      <nav className="px-2.5 pt-2 flex-1">
-        <div
-          className="text-[10px] font-semibold tracking-[.10em] uppercase px-1 mb-1.5 overflow-hidden transition-all duration-300"
-          style={{
-            color: "#AE6D21",
-            maxHeight: collapsed ? 0 : 18,
-            opacity: collapsed ? 0 : 1,
-          }}
-        >
-          Menú
+      {/* Perfil */}
+      {!collapsed ? (
+        <div className="mx-3 mb-3 p-3 rounded-2xl bg-white/60 border border-black/5 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#405FFA] flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+            U
+            {/* Reemplaza con: <img src="/assets/avatar.png" className="w-full h-full rounded-full object-cover" /> */}
+          </div>
+          <div className="overflow-hidden">
+            <div className="text-[12px] font-bold text-[#12263A] truncate">usuario_67</div>
+            <div className="text-[10px] text-[#668EA5]">Cuenta activa</div>
+          </div>
+          <button className="ml-auto text-[#668EA5] hover:text-[#F8910C] transition-colors flex-shrink-0">
+            <Bell size={15} />
+          </button>
         </div>
-        <ul className="flex flex-col gap-0.5 list-none">
-          {navLinks.map(({ id, label, Icon }) => {
-            const active = vistaActual === id;
-            return (
-              <li key={id} className="relative group">
-                <button
-                  onClick={() => cambiarVista(id)}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] transition-colors duration-150 text-left"
-                  style={{
-                    background: active ? "#BDE2F2" : "transparent",
-                    border: `1px solid ${active ? "rgba(102,142,165,0.25)" : "transparent"}`,
-                  }}
-                >
-                  <Icon
-                    size={17}
-                    style={{
-                      color: active ? "#12263A" : "#668EA5",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    className="text-[13px] font-medium whitespace-nowrap overflow-hidden transition-all duration-300"
-                    style={{
-                      maxWidth: collapsed ? 0 : 130,
-                      opacity: collapsed ? 0 : 1,
-                      color: active ? "#12263A" : "#668EA5",
-                      fontWeight: active ? 600 : 500,
-                    }}
-                  >
-                    {label}
-                  </span>
-                </button>
+      ) : (
+        <div className="flex justify-center mb-3">
+          <div className="w-9 h-9 rounded-full bg-[#405FFA] flex items-center justify-center text-white font-bold text-sm">
+            U
+          </div>
+        </div>
+      )}
 
-                {/* Tooltip al estar colapsado */}
-                {collapsed && (
-                  <span
-                    className="absolute left-[54px] top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md text-[11px] font-semibold pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap z-50"
-                    style={{
-                      background: "#12263A",
-                      color: "#FFFACB",
-                    }}
+      {/* Nav */}
+      <nav className="flex-1 px-2.5 overflow-y-auto space-y-0.5">
+        {menuItems.map(({ label, Icon, color, sub }) => (
+          <div key={label}>
+            <button
+              onClick={() => {
+                if (sub.length) setOpenMenu(openMenu === label ? null : label);
+                else cambiarVista(label.toLowerCase());
+              }}
+              className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-colors duration-150 text-left group"
+              style={{ color: "#12263A" }}
+              onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)"}
+              onMouseOut={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+            >
+              <Icon size={17} style={{ color, flexShrink: 0 }} />
+              {!collapsed && (
+                <>
+                  <span className="flex-1">{label}</span>
+                  {sub.length > 0 && (
+                    <ChevronLeft
+                      size={13}
+                      style={{
+                        color: "#668EA5",
+                        transform: openMenu === label ? "rotate(-90deg)" : "rotate(-180deg)",
+                        transition: "transform .2s",
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            </button>
+            {/* Submenú */}
+            {!collapsed && openMenu === label && sub.length > 0 && (
+              <div className="pl-9 pr-2 pb-1 space-y-0.5">
+                {sub.map((s) => (
+                  <button key={s}
+                    className="w-full text-left text-[12px] text-[#668EA5] hover:text-[#12263A] px-2 py-1.5 rounded-lg hover:bg-black/5 transition-colors"
                   >
-                    {label}
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </nav>
 
-      {/* ── Footer CTA ── */}
-      <div
-        className="p-2.5"
-        style={{ borderTop: "1px solid rgba(18,38,58,0.07)" }}
-      >
-        {collapsed ? (
-          <button
-            onClick={() => cambiarVista("registro")}
-            aria-label="Crear cuenta"
-            className="w-11 h-11 rounded-[10px] flex items-center justify-center mx-auto transition-colors duration-150"
-            style={{ background: "#FABE0B" }}
-          >
-            <UserPlus size={18} style={{ color: "#12263A" }} />
-          </button>
-        ) : (
-          <button
-            onClick={() => cambiarVista("registro")}
-            className="w-full py-2.5 rounded-[10px] text-[12px] font-bold font-['Space_Grotesk'] tracking-wide transition-colors duration-150"
-            style={{ background: "#FABE0B", color: "#12263A", border: "none" }}
-            onMouseOver={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "#F8910C";
-            }}
-            onMouseOut={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "#FABE0B";
-            }}
-          >
-            Crear cuenta
-          </button>
-        )}
+      {/* Footer: Configuración + Salir */}
+      <div className="p-2.5 space-y-0.5" style={{ borderTop: "1px solid rgba(18,38,58,0.07)" }}>
+        <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[12px] text-[#668EA5] hover:bg-black/5 transition-colors">
+          <Settings size={15} />
+          {!collapsed && <span>Configuración</span>}
+        </button>
+        <button
+          onClick={() => cambiarVista("casa")}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[12px] text-[#F8910C] hover:bg-red-50 transition-colors"
+        >
+          <LogOut size={15} />
+          {!collapsed && <span>Cerrar sesión</span>}
+        </button>
       </div>
+    </aside>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR PÚBLICO (landing, login, registro)
+   ══════════════════════════════════════════════════════════════ */
+export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (vistaActual === "dashboard") {
+    return (
+      <SidebarDashboard
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        cambiarVista={cambiarVista}
+      />
+    );
+  }
+
+  const navLinks = [
+    { id: "casa",     label: "Casa",           Icon: Home     },
+    { id: "login",    label: "Iniciar sesión",  Icon: LogIn    },
+    { id: "registro", label: "Registrarse",     Icon: UserPlus },
+    { id: "contacto", label: "Contáctanos",     Icon: Mail     },
+  ];
+
+  return (
+    <aside
+      className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out h-screen relative"
+      style={{
+        width: collapsed ? "66px" : "240px",
+        background: "#F4EDEA",
+        borderRight: "1px solid rgba(18,38,58,0.08)",
+        fontFamily: "'Inter',sans-serif",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-3.5 min-h-[60px]">
+        {!collapsed && (
+          <div className="flex items-center gap-2 overflow-hidden">
+            <BetaLogo size={30} />
+            <div className="font-['Space_Grotesk'] text-[13px] font-bold text-[#12263A] leading-tight whitespace-nowrap">
+              BETA
+              <div className="text-[10px] font-normal text-[#668EA5]">Finanzas para jóvenes</div>
+            </div>
+          </div>
+        )}
+        {collapsed && <div className="mx-auto"><BetaLogo size={28} /></div>}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-1.5 rounded-lg hover:bg-black/5 text-[#668EA5] flex-shrink-0 transition-colors"
+        >
+          <ChevronLeft
+            size={15}
+            style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform .3s" }}
+          />
+        </button>
+      </div>
+
+      {/* Nav links */}
+      <nav className="flex-1 px-2.5 py-2 space-y-0.5">
+        {navLinks.map(({ id, label, Icon }) => {
+          const active = vistaActual === id;
+          return (
+            <div key={id} className="relative group">
+              <button
+                onClick={() => cambiarVista(id)}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150"
+                style={{
+                  background: active ? "#405FFA" : "transparent",
+                  color: active ? "white" : "#12263A",
+                }}
+                onMouseOver={e => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
+                }}
+                onMouseOut={e => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                }}
+              >
+                <Icon size={17} style={{ color: active ? "white" : "#668EA5", flexShrink: 0 }} />
+                {!collapsed && <span>{label}</span>}
+              </button>
+              {/* Tooltip colapsado */}
+              {collapsed && (
+                <span className="absolute left-[54px] top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-semibold pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-md"
+                  style={{ background: "#12263A", color: "#FFFACB" }}>
+                  {label}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* ── Ilustración sidebar ── */}
+      {!collapsed ? (
+        <div className="mx-3 mb-3 rounded-2xl overflow-hidden border border-black/5 shadow-sm"
+          style={{ height: 160 }}>
+          <SidebarIllu />
+        </div>
+      ) : (
+        <div className="mx-1 mb-3 rounded-xl overflow-hidden bg-white/40 border border-black/5">
+          <MiniIllu />
+        </div>
+      )}
     </aside>
   );
 }
