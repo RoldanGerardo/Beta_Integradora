@@ -1,24 +1,22 @@
+/* ─────────────────────────────────────────────────
+   src/Components/MovimientosManager.tsx
+───────────────────────────────────────────────── */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   ChevronLeft, ChevronRight, Wallet, Mail, HelpCircle,
   TrendingUp, TrendingDown, GraduationCap, Briefcase, Gift, Tag,
-  Utensils, Bus, School, Ticket, Shirt, Check,
+  Utensils, Bus, School, Ticket, Shirt, Check, Trash2, Loader2, AlertCircle,
 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
+import { Movimiento } from "../models/Movimiento";
+import { obtenerMovimientos, crearMovimiento, eliminarMovimiento } from "../services/api";
 
 interface MovimientosProps {
   tipoVista: "ingresos" | "egresos" | "balance";
   onNavigate?: (vista: string) => void;
 }
 
-interface MovimientoLocal {
-  id: number;
-  monto: number;
-  descripcion: string;
-  fecha: string;
-  tipo: string;
-}
-
+/* Ícono por categoría */
 const categoriaIconos: Record<string, React.ElementType> = {
   Becas: GraduationCap,
   Mesada: Wallet,
@@ -32,6 +30,7 @@ const categoriaIconos: Record<string, React.ElementType> = {
   Ropa: Shirt,
 };
 
+/* Hook: anima un número desde su valor previo hasta `valor` */
 function useCountUp(valor: number, duracion = 500) {
   const [display, setDisplay] = useState(valor);
   const anterior = useRef(valor);
@@ -40,9 +39,9 @@ function useCountUp(valor: number, duracion = 500) {
     const inicio = anterior.current;
     const delta = valor - inicio;
     if (delta === 0) return;
+
     const t0 = performance.now();
     let frame: number;
-
     const tick = (now: number) => {
       const p = Math.min(1, (now - t0) / duracion);
       const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
@@ -59,7 +58,6 @@ function useCountUp(valor: number, duracion = 500) {
 
 export default function MovimientosManager({ tipoVista, onNavigate }: MovimientosProps) {
   const isIngreso = tipoVista === "ingresos";
-
   const tema = isIngreso
     ? { bg: "#E6FBDA", border: "#84D175", text: "#707D4E", chip: "rgba(132,209,117,0.20)" }
     : { bg: "#FFF3E0", border: "#F8910C", text: "#AE6D21", chip: "rgba(248,145,12,0.15)" };
@@ -72,34 +70,35 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
   const [nombre, setNombre] = useState("");
   const [monto, setMonto] = useState("");
   const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
-  const [historial, setHistorial] = useState<MovimientoLocal[]>([]);
-  const [guardado, setGuardado] = useState(false);
 
+  const [historial, setHistorial] = useState<Movimiento[]>([]);
+  const [guardado, setGuardado] = useState(false);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [eliminandoId, setEliminandoId] = useState<number | null>(null);
+
+  // Carga inicial / al cambiar de vista (ingresos <-> egresos)
   useEffect(() => {
+    if (tipoVista === "balance") return;
+
+    let activo = true;
     setCategoriaSeleccionada(categorias[0]);
-    setHistorial([]);
-    
-    (async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/movimientos");
-        if (response.ok) {
-          const data = await response.json();
-          const dataFiltrada = (data as any[])
-            .filter((mov) => (isIngreso ? mov?.detalle?.includes("Ingreso") : mov?.detalle?.includes("Egreso")))
-            .map((mov, i) => ({
-              id: mov.id ?? Date.now() + i,
-              monto: Number(mov.monto),
-              descripcion: mov.descripcion,
-              fecha: mov.fecha,
-              tipo: mov.tipo,
-            }));
-          if (dataFiltrada.length) setHistorial(dataFiltrada);
-        }
-      } catch {
-        // backend no disponible todavía — nos quedamos en modo local
-      }
-    })();
-    
+    setCargando(true);
+    setError(null);
+
+    obtenerMovimientos(isIngreso ? "ingreso" : "egreso")
+      .then((data) => {
+        if (activo) setHistorial(data);
+      })
+      .catch(() => {
+        if (activo) setError("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+
+    return () => { activo = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipoVista]);
 
   const saldoTotal = useMemo(
@@ -108,37 +107,53 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
   );
   const saldoAnimado = useCountUp(saldoTotal);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nombre || !monto || !fecha) return;
 
-    const nuevo: MovimientoLocal = {
-      id: Date.now(),
+    const datos: Omit<Movimiento, "id"> = {
       monto: Number(monto),
       descripcion: nombre,
       fecha,
-      tipo: categoriaSeleccionada,
+      tipo: isIngreso ? "ingreso" : "egreso",
+      categoria: categoriaSeleccionada,
     };
 
-    setHistorial((prev) => [nuevo, ...prev]);
+    // Reflejo optimista mientras se guarda en el backend
+    const idTemporal = Date.now();
+    setHistorial((prev) => [{ ...datos, id: idTemporal }, ...prev]);
     setNombre("");
     setMonto("");
     setGuardado(true);
     setTimeout(() => setGuardado(false), 1600);
 
-    fetch("http://localhost:5000/api/movimientos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        monto: nuevo.monto,
-        descripcion: nuevo.descripcion,
-        fecha: nuevo.fecha,
-        tipo: nuevo.tipo,
-        categoria: isIngreso ? "ingreso" : "egreso",
-      }),
-    }).catch(() => {
-      
-    });
+    try {
+      const guardadoReal = await crearMovimiento(datos);
+      // Reemplaza el id temporal por el real que asigna el backend
+      setHistorial((prev) =>
+        prev.map((m) => (m.id === idTemporal ? guardadoReal : m))
+      );
+    } catch {
+      // Si falla el guardado, quitamos el optimista y avisamos
+      setHistorial((prev) => prev.filter((m) => m.id !== idTemporal));
+      setError("No se pudo guardar el movimiento. Intenta de nuevo.");
+    }
+  };
+
+  const handleEliminar = async (id?: number) => {
+    if (id === undefined) return;
+    const respaldo = historial;
+    setEliminandoId(id);
+    setHistorial((prev) => prev.filter((m) => m.id !== id));
+
+    try {
+      await eliminarMovimiento(id);
+    } catch {
+      setHistorial(respaldo); // revertir si falla
+      setError("No se pudo eliminar el movimiento.");
+    } finally {
+      setEliminandoId(null);
+    }
   };
 
   if (tipoVista === "balance") {
@@ -161,46 +176,38 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         @keyframes popIn { 0% { opacity:0; transform: scale(.9); } 100% { opacity:1; transform: scale(1); } }
         @keyframes bounceSoft { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
         @keyframes checkPop { 0% { transform: scale(.6); opacity:0; } 60% { transform: scale(1.15); opacity:1; } 100% { transform: scale(1); opacity:1; } }
+        @keyframes slideOut { to { opacity:0; transform: translateX(20px); max-height:0; padding:0; margin:0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      <header
-        className="flex items-center justify-between px-8 py-3 flex-shrink-0"
-        style={{ background: "#F4EDEA", borderBottom: "1px solid rgba(18,38,58,0.07)" }}
-      >
-        <div
-          className="px-5 py-1.5 rounded-full text-[13px] font-bold flex items-center gap-2 tracking-tight"
-          style={{ background: tema.bg, color: "#12263A", border: `1px solid ${tema.border}40` }}
-        >
+      {/* ── TOP BAR ── */}
+      <header className="flex items-center justify-between px-8 py-3 flex-shrink-0" style={{ background: "#F4EDEA", borderBottom: "1px solid rgba(18,38,58,0.07)" }}>
+        <div className="px-5 py-1.5 rounded-full text-[13px] font-bold flex items-center gap-2 tracking-tight" style={{ background: tema.bg, color: "#12263A", border: `1px solid ${tema.border}40` }}>
           {isIngreso ? <TrendingUp size={14} style={{ color: tema.text }} /> : <TrendingDown size={14} style={{ color: tema.text }} />}
           Tus {tipoVista}
         </div>
         <div className="flex items-center gap-2">
-          <button
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-            style={{ background: "rgba(18,38,58,0.06)" }}
-            title="Notificaciones"
-          >
+          <button className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95" style={{ background: "rgba(18,38,58,0.06)" }} title="Notificaciones">
             <span className="text-[16px]">🔔</span>
           </button>
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-sm transition-transform duration-200 hover:scale-110"
-            style={{ background: "#405FFA" }}
-          >
-            U
-          </div>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-sm transition-transform duration-200 hover:scale-110" style={{ background: "#405FFA" }}>U</div>
         </div>
       </header>
 
+      {/* ── CONTENIDO ── */}
       <div className="flex-1 px-8 py-6 flex flex-col gap-5 overflow-y-auto max-w-5xl w-full mx-auto">
 
-        <div
-          className="rounded-2xl p-5 flex items-center gap-5 relative overflow-hidden transition-shadow duration-300 hover:shadow-md"
-          style={{ background: tema.bg, border: `1px solid ${tema.border}40` }}
-        >
-          <div
-            className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center z-10 transition-transform duration-300 hover:rotate-6"
-            style={{ background: `${tema.border}25` }}
-          >
+        {error && (
+          <div className="rounded-xl p-3 flex items-center gap-2 text-[12px] font-semibold animate-[fadeInUp_.3s_ease-out]" style={{ background: "#FEE2E2", color: "#B91C1C" }}>
+            <AlertCircle size={16} />
+            {error}
+            <button onClick={() => setError(null)} className="ml-auto font-bold hover:opacity-70 transition-opacity">✕</button>
+          </div>
+        )}
+
+        {/* Saldo / total */}
+        <div className="rounded-2xl p-5 flex items-center gap-5 relative overflow-hidden transition-shadow duration-300 hover:shadow-md" style={{ background: tema.bg, border: `1px solid ${tema.border}40` }}>
+          <div className="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center z-10 transition-transform duration-300 hover:rotate-6" style={{ background: `${tema.border}25` }}>
             {isIngreso ? <TrendingUp size={26} style={{ color: tema.text }} /> : <TrendingDown size={26} style={{ color: tema.text }} />}
           </div>
           <div className="flex-1 z-10">
@@ -208,22 +215,22 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
               {isIngreso ? "Saldo disponible" : "Total de egresos"}
             </div>
             <div className="text-[28px] font-bold tabular-nums tracking-tight" style={{ color: "#12263A" }}>
-              ${saldoAnimado.toFixed(2)}
+              {cargando ? (
+                <Loader2 size={22} className="animate-spin" style={{ animation: "spin 1s linear infinite" }} />
+              ) : (
+                `$${saldoAnimado.toFixed(2)}`
+              )}
             </div>
             <div className="text-[12px]" style={{ color: "#668EA5", fontFamily: "'Inter',sans-serif" }}>
               {historial.length} {historial.length === 1 ? "movimiento registrado" : "movimientos registrados"}
             </div>
           </div>
-          <div
-            className="absolute right-[-30px] top-[-30px] w-36 h-36 rounded-full pointer-events-none transition-transform duration-700"
-            style={{ background: tema.border, opacity: 0.10 }}
-          />
+          <div className="absolute right-[-30px] top-[-30px] w-36 h-36 rounded-full pointer-events-none transition-transform duration-700" style={{ background: tema.border, opacity: 0.10 }} />
         </div>
 
+        {/* Categorías */}
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-3" style={{ color: "#668EA5" }}>
-            Categorías
-          </p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-3" style={{ color: "#668EA5" }}>Categorías</p>
           <div className="flex items-center gap-2">
             <button className="flex-shrink-0 transition-colors duration-150 hover:text-[#12263A]" style={{ color: "#668EA5" }}>
               <ChevronLeft size={20} />
@@ -238,27 +245,15 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
                     type="button"
                     onClick={() => setCategoriaSeleccionada(cat)}
                     className="flex flex-col items-center gap-1.5 flex-shrink-0 transition-transform duration-200"
-                    style={{
-                      transform: activo ? "scale(1.06)" : "scale(1)",
-                      animation: `fadeInUp .35s ease-out ${i * 0.04}s both`,
-                    }}
+                    style={{ transform: activo ? "scale(1.06)" : "scale(1)", animation: `fadeInUp .35s ease-out ${i * 0.04}s both` }}
                   >
                     <div
                       className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
-                      style={{
-                        background: activo ? "#405FFA" : tema.chip,
-                        color: activo ? "white" : tema.text,
-                        boxShadow: activo ? "0 6px 14px rgba(64,95,250,0.28)" : "none",
-                      }}
+                      style={{ background: activo ? "#405FFA" : tema.chip, color: activo ? "white" : tema.text, boxShadow: activo ? "0 6px 14px rgba(64,95,250,0.28)" : "none" }}
                     >
                       <Icono size={20} />
                     </div>
-                    <span
-                      className="text-[11px] font-semibold transition-colors duration-200"
-                      style={{ color: activo ? "#405FFA" : "#668EA5" }}
-                    >
-                      {cat}
-                    </span>
+                    <span className="text-[11px] font-semibold transition-colors duration-200" style={{ color: activo ? "#405FFA" : "#668EA5" }}>{cat}</span>
                   </button>
                 );
               })}
@@ -269,6 +264,7 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           </div>
         </div>
 
+        {/* Formulario + Lista */}
         <div className="grid md:grid-cols-2 gap-5">
           {/* Formulario */}
           <div className="bg-white rounded-2xl p-6 transition-shadow duration-300 hover:shadow-md" style={{ border: "1px solid rgba(18,38,58,0.06)" }}>
@@ -277,9 +273,7 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#668EA5" }}>
-                  Nombre
-                </label>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#668EA5" }}>Nombre</label>
                 <input
                   type="text"
                   placeholder={isIngreso ? "Ej. Mesada de junio" : "Ej. Cine con amigos"}
@@ -291,12 +285,9 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
                   onBlur={(e) => ((e.target as HTMLInputElement).style.borderBottomColor = "rgba(18,38,58,0.15)")}
                 />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#668EA5" }}>
-                    Monto
-                  </label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#668EA5" }}>Monto</label>
                   <input
                     type="number"
                     placeholder="$0.00"
@@ -309,9 +300,7 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#668EA5" }}>
-                    Fecha
-                  </label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.14em] mb-1.5" style={{ color: "#668EA5" }}>Fecha</label>
                   <input
                     type="date"
                     value={fecha}
@@ -323,22 +312,13 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
                   />
                 </div>
               </div>
-
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl transition-colors duration-200" style={{ background: tema.chip }}>
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: tema.text }}>
-                  Categoría:
-                </span>
-                <span className="text-[12px] font-semibold" style={{ color: "#12263A" }}>
-                  {categoriaSeleccionada}
-                </span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: tema.text }}>Categoría:</span>
+                <span className="text-[12px] font-semibold" style={{ color: "#12263A" }}>{categoriaSeleccionada}</span>
               </div>
-
               <div className="flex justify-end items-center gap-2 pt-2">
                 {guardado && (
-                  <span
-                    className="flex items-center gap-1 text-[11px] font-bold mr-auto"
-                    style={{ color: tema.text, animation: "checkPop .35s ease-out" }}
-                  >
+                  <span className="flex items-center gap-1 text-[11px] font-bold mr-auto" style={{ color: tema.text, animation: "checkPop .35s ease-out" }}>
                     <Check size={14} /> ¡Guardado!
                   </span>
                 )}
@@ -361,42 +341,56 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
             </form>
           </div>
 
+          {/* Lista */}
           <div className="bg-white rounded-2xl p-6 transition-shadow duration-300 hover:shadow-md" style={{ border: "1px solid rgba(18,38,58,0.06)" }}>
             <h3 className="font-bold text-[15px] mb-5 tracking-tight" style={{ color: "#12263A" }}>
               Historial de {tipoVista}
             </h3>
             <div className="space-y-2.5 h-64 overflow-y-auto pr-1">
-              {historial.length === 0 ? (
+              {cargando ? (
+                <div className="h-full flex flex-col items-center justify-center gap-2 text-center">
+                  <Loader2 size={24} style={{ color: tema.border, animation: "spin 1s linear infinite" }} />
+                  <p className="text-[12px]" style={{ color: "#668EA5", fontFamily: "'Inter',sans-serif" }}>Cargando movimientos...</p>
+                </div>
+              ) : historial.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center gap-2 text-center">
                   <Wallet size={28} style={{ color: "#BDE2F2", animation: "bounceSoft 2.4s ease-in-out infinite" }} />
-                  <p className="text-[12px]" style={{ color: "#668EA5", fontFamily: "'Inter',sans-serif" }}>
-                    Aún no hay {tipoVista} registrados.
-                  </p>
+                  <p className="text-[12px]" style={{ color: "#668EA5", fontFamily: "'Inter',sans-serif" }}>Aún no hay {tipoVista} registrados.</p>
                 </div>
               ) : (
                 historial.map((item, idx) => {
-                  const Icono = categoriaIconos[item.tipo] ?? Tag;
+                  const Icono = categoriaIconos[item.categoria] ?? Tag;
+                  const seEstaEliminando = eliminandoId === item.id;
                   return (
                     <div
                       key={item.id}
-                      className="p-3 rounded-xl flex items-center justify-between transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-sm"
-                      style={{ background: tema.bg, animation: `popIn .3s ease-out ${idx === 0 ? 0 : 0.02}s both` }}
+                      className="group p-3 rounded-xl flex items-center justify-between transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm"
+                      style={{
+                        background: tema.bg,
+                        animation: seEstaEliminando ? "slideOut .25s ease-in forwards" : `popIn .3s ease-out ${idx === 0 ? 0 : 0.02}s both`,
+                      }}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "white" }}>
                           <Icono size={16} style={{ color: tema.text }} />
                         </div>
-                        <div>
-                          <p className="text-[13px] font-bold" style={{ color: "#12263A" }}>
-                            {item.descripcion}
-                          </p>
-                          <p className="text-[10px]" style={{ color: "#668EA5" }}>
-                            {item.tipo} · {item.fecha}
-                          </p>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-bold truncate" style={{ color: "#12263A" }}>{item.descripcion}</p>
+                          <p className="text-[10px]" style={{ color: "#668EA5" }}>{item.categoria} · {item.fecha}</p>
                         </div>
                       </div>
-                      <div className="font-bold text-[14px] tabular-nums" style={{ color: tema.text }}>
-                        {isIngreso ? "+" : "-"}${Number(item.monto).toFixed(2)}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="font-bold text-[14px] tabular-nums" style={{ color: tema.text }}>
+                          {isIngreso ? "+" : "-"}${Number(item.monto).toFixed(2)}
+                        </div>
+                        <button
+                          onClick={() => handleEliminar(item.id)}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-white active:scale-90"
+                          style={{ color: "#B91C1C" }}
+                          title="Eliminar movimiento"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
                   );
@@ -406,13 +400,9 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           </div>
         </div>
 
-        <div
-          className="rounded-2xl p-5 flex items-center gap-3 relative overflow-hidden transition-shadow duration-300 hover:shadow-md"
-          style={{ background: tema.bg, border: `1px solid ${tema.border}40` }}
-        >
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-[16px] flex-shrink-0" style={{ background: `${tema.border}22` }}>
-            💡
-          </div>
+        {/* Consejo */}
+        <div className="rounded-2xl p-5 flex items-center gap-3 relative overflow-hidden transition-shadow duration-300 hover:shadow-md" style={{ background: tema.bg, border: `1px solid ${tema.border}40` }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-[16px] flex-shrink-0" style={{ background: `${tema.border}22` }}>💡</div>
           <p className="text-[12px] font-semibold leading-relaxed" style={{ color: "#12263A", fontFamily: "'Inter',sans-serif" }}>
             {isIngreso
               ? "Separa un porcentaje de cada ingreso apenas lo recibas: tu yo futuro te lo va a agradecer."
@@ -421,10 +411,8 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         </div>
       </div>
 
-      <footer
-        className="flex items-center justify-between px-8 py-3 flex-shrink-0"
-        style={{ background: "#BDE2F2", borderTop: "1px solid rgba(18,38,58,0.08)" }}
-      >
+      {/* ── FOOTER ── */}
+      <footer className="flex items-center justify-between px-8 py-3 flex-shrink-0" style={{ background: "#BDE2F2", borderTop: "1px solid rgba(18,38,58,0.08)" }}>
         <button
           className="flex items-center gap-2 text-[12px] font-bold transition-colors duration-150"
           style={{ color: "#668EA5" }}
@@ -436,22 +424,14 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         </button>
         <div className="flex flex-col items-center">
           <BetaLogo size={22} />
-          <span className="text-[10px] font-bold mt-0.5 tracking-tight" style={{ color: "#405FFA" }}>
-            BETA: Finanzas para los Jóvenes
-          </span>
+          <span className="text-[10px] font-bold mt-0.5 tracking-tight" style={{ color: "#405FFA" }}>BETA: Finanzas para los Jóvenes</span>
         </div>
         <button
           onClick={() => onNavigate && onNavigate("contacto")}
           className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
           style={{ border: "2px solid rgba(18,38,58,0.18)", color: "#668EA5" }}
-          onMouseOver={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "#12263A";
-            (e.currentTarget as HTMLElement).style.color = "white";
-          }}
-          onMouseOut={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "#668EA5";
-          }}
+          onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.background = "#12263A"; (e.currentTarget as HTMLElement).style.color = "white"; }}
+          onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#668EA5"; }}
           title="Ayuda y Soporte"
         >
           <HelpCircle size={16} />
