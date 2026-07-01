@@ -203,17 +203,19 @@ function SidebarDashboard({
               )}
             </button>
             {/* Submenú */}
-            {!collapsed && openMenu === label && sub.length > 0 && (
+              {!collapsed && openMenu === label && sub.length > 0 && (
               <div className="pl-9 pr-2 pb-1 space-y-0.5">
-                {sub.map((s) => (
-                  <button key={s}
-                    className="w-full text-left text-[12px] text-[#668EA5] hover:text-[#12263A] px-2 py-1.5 rounded-lg hover:bg-black/5 transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+              {sub.map((s) => (
+                 <button 
+                  key={s}
+                 onClick={() => cambiarVista(s.toLowerCase())}
+                 className="w-full text-left text-[12px] text-[#668EA5] hover:text-[#12263A] px-2 py-1.5 rounded-lg hover:bg-black/5 transition-colors"
+               >
+                {s}
+               </button>
+              ))}
+            </div>
+             )}
           </div>
         ))}
       </nav>

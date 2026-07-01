@@ -1,63 +1,65 @@
+/* ─────────────────────────────────────────────────
+   src/Components/MovimientosManager.tsx
+   ───────────────────────────────────────────────── */
 import React, { useState, useEffect } from "react";
-import { PlusCircle, ArrowUpRight, ArrowDownLeft, Calendar, FileText, DollarSign } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wallet, CheckCircle } from "lucide-react";
 
-interface MovimientoData {
-  id: number;
-  monto: number;
-  descripcion: string;
-  fecha: string;
-  tipo: string;
-  detalle: string;
+interface MovimientosProps {
+  tipoVista: "ingresos" | "egresos" | "balance";
 }
 
-export default function MovimientosManager() {
-  // Estados para el formulario
-  const [categoria, setCategoria] = useState<"ingreso" | "egreso">("ingreso");
-  const [monto, setMonto] = useState<string>("");
-  const [descripcion, setDescripcion] = useState<string>("");
-  const [fecha, setFecha] = useState<string>(new Date().toISOString().split("T")[0]);
-  const [tipo, setTipo] = useState<string>("Alineación"); // Opciones dinámicas para el taller financiero
+export default function MovimientosManager({ tipoVista }: MovimientosProps) {
+  const isIngreso = tipoVista === "ingresos";
+  
+  // Categorías según la vista (Círculos)
+  const categorias = isIngreso 
+    ? ["Becas", "Mesada", "Trabajo", "Regalos", "Ventas"] 
+    : ["Comida", "Transporte", "Escuela", "Salidas", "Ropa"];
 
-  // Estado para la lista del backend
-  const [movimientos, setMovimientos] = useState<MovimientoData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [mensajeStatus, setMensajeStatus] = useState<{ texto: string; error: boolean } | null>(null);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(categorias[0]);
+  const [nombre, setNombre] = useState("");
+  const [monto, setMonto] = useState("");
+  const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
+  
+  // Datos del backend
+  const [historial, setHistorial] = useState<any[]>([]);
+  const [saldoTotal, setSaldoTotal] = useState(0);
 
-  // Cargar movimientos desde el backend al montar el componente
+  // Cargar datos
   const cargarMovimientos = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/movimientos");
       if (response.ok) {
         const data = await response.json();
-        setMovimientos(data);
+        // Filtrar solo los del tipo actual para la lista
+        const dataFiltrada = data.filter((mov: any) => 
+          isIngreso ? mov.detalle.includes("Ingreso") : mov.detalle.includes("Egreso")
+        );
+        setHistorial(dataFiltrada);
+
+        // Calcular total
+        const total = dataFiltrada.reduce((acc: number, curr: any) => acc + Number(curr.monto), 0);
+        setSaldoTotal(total);
       }
     } catch (error) {
-      console.error("Error de conexión con el servidor de la API:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error cargando historial:", error);
     }
   };
 
   useEffect(() => {
     cargarMovimientos();
-  }, []);
+  }, [tipoVista]);
 
-  // Enviar el formulario para instanciar en el backend
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMensajeStatus(null);
-
-    if (!monto || !descripcion || !fecha || !tipo) {
-      setMensajeStatus({ texto: "Por favor, completa todos los campos requeridos.", error: true });
-      return;
-    }
+    if (!nombre || !monto || !fecha) return;
 
     const nuevoRegistro = {
       monto: Number(monto),
-      descripcion,
+      descripcion: nombre,
       fecha,
-      tipo,
-      categoria
+      tipo: categoriaSeleccionada,
+      categoria: isIngreso ? "ingreso" : "egreso"
     };
 
     try {
@@ -66,192 +68,152 @@ export default function MovimientosManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevoRegistro)
       });
-
       if (response.ok) {
-        setMensajeStatus({ texto: "¡Movimiento procesado e instanciado correctamente!", error: false });
+        setNombre("");
         setMonto("");
-        setDescripcion("");
-        cargarMovimientos(); // Recargar la lista con el nuevo estado del backend
-      } else {
-        const errData = await response.json();
-        setMensajeStatus({ texto: errData.mensaje || "Error al registrar.", error: true });
+        cargarMovimientos();
       }
     } catch (error) {
-      setMensajeStatus({ texto: "No se pudo conectar con el servidor backend.", error: true });
+      console.error("Error al guardar:", error);
     }
   };
 
+  if (tipoVista === "balance") {
+    return (
+      <div className="flex-1 p-8 bg-[#FFFACB] flex items-center justify-center">
+        <h2 className="text-2xl font-bold text-[#12263A]">Vista de Balance Global en Construcción 🚧</h2>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 min-h-screen p-8 flex flex-col lg:flex-row gap-8" style={{ background: "#FFFACB", fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div className="flex-1 min-h-screen relative font-['Space_Grotesk'] overflow-y-auto" style={{ background: "#FFFACB" }}>
       
-      {/* SECCIÓN IZQUIERDA: Formulario Operativo */}
-      <div className="w-full lg:w-5/12 bg-white rounded-2xl p-6 shadow-sm border border-black/5 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-[#405FFA]/10 text-[#405FFA]">
-              <DollarSign size={24} />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-[#12263A]">Registrar Operación</h2>
-              <p className="text-xs text-[#668EA5]">Introduce los flujos de caja del taller mecánico</p>
-            </div>
-          </div>
-
-          {/* Selector de Categoría Flujo de Caja */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <button
-              type="button"
-              onClick={() => { setCategoria("ingreso"); setTipo("Alineación"); }}
-              className={`py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border transition-all ${
-                categoria === "ingreso"
-                  ? "bg-[#E6FBDA] border-[#84D175] text-[#707D4E]"
-                  : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"
-              }`}
-            >
-              <ArrowUpRight size={18} /> Ingreso
-            </button>
-            <button
-              type="button"
-              onClick={() => { setCategoria("egreso"); setTipo("Refacciones"); }}
-              className={`py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border transition-all ${
-                categoria === "egreso"
-                  ? "bg-red-50 border-red-200 text-red-600"
-                  : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"
-              }`}
-            >
-              <ArrowDownLeft size={18} /> Egreso
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-[#12263A] uppercase tracking-wider mb-1">Monto ($ MXN)</label>
-              <input
-                type="number"
-                value={monto}
-                onChange={(e) => setMonto(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#405FFA] text-sm text-[#12263A]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#12263A] uppercase tracking-wider mb-1">Concepto / Tipo</label>
-              <select
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-[#405FFA] text-sm text-[#12263A]"
-              >
-                {categoria === "ingreso" ? (
-                  <>
-                    <option value="Alineación">Servicio de Alineación</option>
-                    <option value="Balanceo">Servicio de Balanceo</option>
-                    <option value="Diagnóstico">Diagnóstico General</option>
-                    <option value="Mano de Obra">Mano de Obra Directa</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="Refacciones">Compra de Refacciones</option>
-                    <option value="Herramientas">Mantenimiento de Maquinaria</option>
-                    <option value="Insumos">Insumos de Taller (Aceites/Fluidos)</option>
-                    <option value="Servicios Públicos">Gastos de Operación (Luz/Agua)</option>
-                  </>
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#12263A] uppercase tracking-wider mb-1">Fecha de Ejecución</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#405FFA] text-sm text-[#12263A]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#12263A] uppercase tracking-wider mb-1">Descripción Breve</label>
-              <textarea
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Escribe los detalles específicos del movimiento..."
-                rows={3}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#405FFA] text-sm text-[#12263A] resize-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 rounded-xl font-bold text-sm text-[#12263A] flex items-center justify-center gap-2 shadow-sm hover:opacity-90 transition-opacity"
-              style={{ background: "#FABE0B" }}
-            >
-              <PlusCircle size={18} /> Procesar en Simulador
-            </button>
-          </form>
+      {/* Contenedor Principal Limitado */}
+      <div className="max-w-4xl mx-auto p-6 flex flex-col items-center">
+        
+        {/* Placeholder Imagen Superior */}
+        <div className="w-full h-40 bg-black/10 rounded-2xl flex items-center justify-center mb-6 border-2 border-dashed border-black/20">
+          <p className="font-bold text-[#12263A]/50 text-sm uppercase tracking-widest text-center px-4">
+            [IMAGEN O ILUSTRACIÓN ALUSIVA A LOS {isIngreso ? "INGRESOS" : "EGRESOS"}]
+          </p>
         </div>
 
-        {mensajeStatus && (
-          <div className={`mt-4 p-3 rounded-xl text-xs font-medium border ${
-            mensajeStatus.error ? "bg-red-50 border-red-100 text-red-600" : "bg-[#E6FBDA] border-[#84D175]/30 text-[#707D4E]"
-          }`}>
-            {mensajeStatus.texto}
-          </div>
-        )}
-      </div>
+        {/* Título Amarillo */}
+        <h1 className="bg-[#FABE0B] text-white px-8 py-2 rounded-full font-bold text-lg md:text-xl uppercase shadow-sm mb-6">
+          Bienvenido a tus {tipoVista}
+        </h1>
 
-      {/* SECCIÓN DERECHA: Visualización y Ledger del Backend */}
-      <div className="flex-1 bg-[#F4EDEA] rounded-2xl p-6 border border-black/5 flex flex-col">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-[#12263A]">Historial de Caja Simulado</h2>
-          <p className="text-xs text-[#668EA5]">Registros validados mediante polimorfismo en el servidor</p>
-        </div>
-
-        <div className="flex-1 overflow-y-auto max-h-[520px] pr-2 space-y-3">
-          {loading ? (
-            <p className="text-sm text-center py-8 text-[#668EA5]">Sincronizando flujos financieros...</p>
-          ) : movimientos.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-gray-300 rounded-xl bg-white/50">
-              <p className="text-sm text-[#668EA5]">No hay transacciones registradas en el turno actual.</p>
-            </div>
-          ) : (
-            movimientos.map((mov) => {
-              const esIngreso = mov.detalle.startsWith("Ingreso");
-              return (
-                <div
-                  key={mov.id}
-                  className="bg-white p-4 rounded-xl border border-black/5 shadow-sm flex items-start justify-between hover:scale-[1.01] transition-transform"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2.5 rounded-xl mt-0.5 ${esIngreso ? "bg-[#E6FBDA] text-[#84D175]" : "bg-red-50 text-red-500"}`}>
-                      {esIngreso ? <ArrowUpRight size={18} /> : <ArrowDownLeft size={18} />}
-                    </div>
-                    <div>
-                      <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mb-1 uppercase tracking-wide bg-gray-100 text-[#12263A]">
-                        {mov.tipo}
-                      </span>
-                      <p className="text-sm font-semibold text-[#12263A] mb-0.5">{mov.descripcion}</p>
-                      <p className="text-xs text-gray-400 font-mono italic">{mov.detalle}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right flex flex-col items-end justify-between h-full">
-                    <span className={`text-sm font-bold ${esIngreso ? "text-green-600" : "text-red-600"}`}>
-                      {esIngreso ? "+" : "-"} ${mov.monto.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-[11px] text-[#668EA5] flex items-center gap-1 mt-2">
-                      <Calendar size={12} /> {mov.fecha}
-                    </span>
-                  </div>
+        {/* Carrusel de Categorías */}
+        <p className="text-xs font-bold text-[#12263A] uppercase tracking-widest mb-3">Categorías</p>
+        <div className="flex items-center gap-4 mb-8 w-full justify-center">
+          <button className="text-gray-400 hover:text-black"><ChevronLeft size={24}/></button>
+          <div className="flex gap-4 overflow-x-auto py-2 px-1">
+            {categorias.map((cat) => (
+              <div key={cat} onClick={() => setCategoriaSeleccionada(cat)} className="flex flex-col items-center gap-2 cursor-pointer">
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold transition-all ${
+                  categoriaSeleccionada === cat 
+                  ? "bg-[#405FFA] text-white shadow-md transform scale-110" 
+                  : "bg-black/40 text-black/40"
+                }`}>
+                  ?
                 </div>
-              );
-            })
-          )}
+                <span className={`text-xs font-bold ${categoriaSeleccionada === cat ? "text-[#405FFA]" : "text-[#12263A]"}`}>{cat}</span>
+              </div>
+            ))}
+          </div>
+          <button className="text-gray-400 hover:text-black"><ChevronRight size={24}/></button>
         </div>
-      </div>
 
+        {/* Tarjeta de Saldo */}
+        <div className="bg-white rounded-2xl shadow-sm border border-black/5 p-4 flex items-center gap-4 pr-12 mb-8">
+          <div className="w-12 h-12 bg-[#E6FBDA] rounded-xl flex items-center justify-center text-[#84D175]">
+            <Wallet size={24} />
+          </div>
+          <div>
+            <div className={`text-2xl font-bold ${isIngreso ? 'text-[#84D175]' : 'text-[#F8910C]'}`}>
+              ${saldoTotal.toFixed(2)}
+            </div>
+            <div className="text-[11px] font-bold text-[#12263A] uppercase">
+              {isIngreso ? "Saldo disponible" : "Egresos Totales"}
+            </div>
+          </div>
+        </div>
+
+        {/* Formularios y Listas Split */}
+        <div className="w-full grid md:grid-cols-2 gap-6 mb-8">
+          
+          {/* Formulario (Nuevo) */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-black/5">
+            <h3 className="text-center font-bold text-[#405FFA] mb-6">Nuevo {isIngreso ? "ingreso" : "egreso"}</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold text-[#12263A] ml-2">Nombre del {isIngreso ? "ingreso" : "egreso"}</label>
+                <input type="text" value={nombre} onChange={(e)=>setNombre(e.target.value)} className="w-full bg-[#BDE2F2]/40 rounded-full px-4 py-2 mt-1 text-sm outline-none focus:ring-2 ring-[#405FFA]" />
+              </div>
+              
+              <div>
+                <label className="text-[10px] font-bold text-[#12263A] ml-2">Categoría</label>
+                <div className="w-full bg-[#BDE2F2]/40 rounded-full px-4 py-2 mt-1 text-sm text-[#668EA5] truncate">
+                  {categoriaSeleccionada}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-[#12263A] ml-2">Monto</label>
+                  <input type="number" value={monto} onChange={(e)=>setMonto(e.target.value)} className="w-full bg-[#BDE2F2]/40 rounded-full px-4 py-2 mt-1 text-sm outline-none focus:ring-2 ring-[#405FFA]" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-[#12263A] ml-2">Fecha</label>
+                  <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} className="w-full bg-[#BDE2F2]/40 rounded-full px-4 py-2 mt-1 text-sm outline-none focus:ring-2 ring-[#405FFA]" />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <button type="button" onClick={()=>{setNombre(""); setMonto("")}} className="px-4 py-1.5 rounded-full text-xs font-bold text-[#12263A] bg-[#FFFACB]">Descartar</button>
+                <button type="submit" className="px-4 py-1.5 rounded-full text-xs font-bold text-[#12263A] bg-[#FABE0B]">Guardar</button>
+              </div>
+            </form>
+          </div>
+
+          {/* Lista de Registros */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-black/5">
+            <h3 className="text-center font-bold text-[#405FFA] mb-6">Lista de {tipoVista}</h3>
+            <div className="space-y-3 h-64 overflow-y-auto pr-2 custom-scrollbar">
+              {historial.length === 0 ? (
+                <p className="text-center text-sm text-gray-400 mt-10">No hay registros aún.</p>
+              ) : (
+                historial.map((item, idx) => (
+                  <div key={idx} className={`p-3 rounded-2xl flex items-center justify-between ${isIngreso ? 'bg-[#E6FBDA]/50' : 'bg-[#FFF3E0]/50'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-6 rounded-full ${isIngreso ? 'bg-[#84D175]/30' : 'bg-[#F8910C]/30'}`}></div>
+                      <div>
+                        <p className="text-sm font-bold text-[#12263A]">{item.descripcion}</p>
+                        <p className="text-[10px] text-[#668EA5]">{item.tipo} - {item.fecha}</p>
+                      </div>
+                    </div>
+                    <div className={`font-bold ${isIngreso ? 'text-[#84D175]' : 'text-[#F8910C]'}`}>
+                      ${Number(item.monto).toFixed(2)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Banner de Consejo Inferior */}
+        <div className="w-full bg-white/50 backdrop-blur-sm p-4 rounded-full border border-black/5 flex items-center justify-center gap-4 mb-20 shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-[#BDE2F2] flex items-center justify-center text-xl">
+             💡
+          </div>
+          <p className="text-sm font-bold text-[#405FFA] uppercase tracking-wider">
+            [AQUÍ IRÁ UN CONSEJO SOBRE {isIngreso ? "EL AHORRO" : "LA SALUD FINANCIERA"}]
+          </p>
+        </div>
+
+      </div>
     </div>
   );
 }

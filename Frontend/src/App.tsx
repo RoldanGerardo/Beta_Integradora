@@ -2,12 +2,12 @@
    src/App.tsx
    ───────────────────────────────────────────────── */
 import { useState } from "react";
-import Sidebar    from "./Components/Sidebar";
+import Sidebar from "./Components/Sidebar";
 import LandingPage from "./Components/LandingPage";
-import Dashboard  from "./Components/Dashboard";
-import Registro   from "./Components/Registro";
-import Login      from "./Components/Login";
-import MovimientosManager from "./Components/MovimientosManager"; // <-- 1. Nueva importación agregada
+import Dashboard from "./Components/Dashboard";
+import Registro from "./Components/Registro";
+import Login from "./Components/Login";
+import MovimientosManager from "./Components/MovimientosManager";
 
 export default function App() {
   const [vista, setVista] = useState<string>("casa");
@@ -15,24 +15,24 @@ export default function App() {
   const renderVista = () => {
     switch (vista) {
       case "casa":      return <LandingPage onNavigate={setVista} />;
-      case "dashboard": return <Dashboard   onNavigate={setVista} />;
-      case "registro":  return <Registro    onNavigate={setVista} />;
-      case "login":     return <Login       onNavigate={setVista} />;
-      case "movimientos": return <MovimientosManager />; // <-- 2. Nueva ruta agregada
+      case "dashboard": return <Dashboard onNavigate={setVista} />;
+      case "registro":  return <Registro onNavigate={setVista} />;
+      case "login":     return <Login onNavigate={setVista} />;
+      
+      // 🔥 NUEVAS RUTAS SEGÚN EL SUBMENÚ DEL SIDEBAR 🔥
+      case "ingresos":  return <MovimientosManager tipoVista="ingresos" />;
+      case "egresos":   return <MovimientosManager tipoVista="egresos" />;
+      case "balance":   return <MovimientosManager tipoVista="balance" />;
+      
       default:
         return (
-          <div
-            className="flex-1 flex flex-col items-center justify-center gap-3"
-            style={{ background: "#FFFACB", fontFamily: "'Space Grotesk',sans-serif" }}
-          >
+          <div className="flex-1 flex flex-col items-center justify-center gap-3" style={{ background: "#FFFACB", fontFamily: "'Space Grotesk',sans-serif" }}>
             <span className="text-4xl">🚧</span>
             <p className="text-[16px] font-semibold" style={{ color: "#12263A" }}>
-              Vista{" "}
-              <code className="bg-white px-2 py-0.5 rounded text-sm">{vista}</code>{" "}
-              — próximamente
+              Vista <code className="bg-white px-2 py-0.5 rounded text-sm">{vista}</code> — próximamente
             </p>
             <button
-              onClick={() => setVista("casa")}
+              onClick={() => setVista("dashboard")}
               className="text-[13px] px-4 py-2 rounded-lg font-bold"
               style={{ background: "#FABE0B", color: "#12263A", border: "none", cursor: "pointer" }}
             >
