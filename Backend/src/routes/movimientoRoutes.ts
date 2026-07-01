@@ -11,7 +11,7 @@ let historialMovimientos: any[] = [
   new Egreso(1003, 300, "Compra de despensa", "2026-06-10", "egreso", "Comida"),
 ];
 
-// Convierte una instancia de Movimiento a un objeto plano para el frontend
+// convierte una instancia de Movimiento a un objeto plano para el frontend
 const mapMovimiento = (m: any) => ({
   id: m.getId(),
   monto: m.getMonto(),
@@ -21,9 +21,6 @@ const mapMovimiento = (m: any) => ({
   categoria: m.getCategoria(),
 });
 
-// GET /movimientos          -> todos
-// GET /movimientos?tipo=ingreso  -> solo ingresos
-// GET /movimientos?tipo=egreso   -> solo egresos
 router.get("/", (req: Request, res: Response) => {
   const { tipo } = req.query;
 
@@ -35,7 +32,6 @@ router.get("/", (req: Request, res: Response) => {
   res.status(200).json(resultado.map(mapMovimiento));
 });
 
-// POST /movimientos
 router.post("/", (req: Request, res: Response) => {
   const { monto, descripcion, fecha, tipo, categoria } = req.body;
 
@@ -45,17 +41,20 @@ router.post("/", (req: Request, res: Response) => {
     });
   }
 
+  // genera el id
   const id = Date.now();
-  const nuevo =
-    tipo === "ingreso"
-      ? new Ingreso(id, Number(monto), descripcion, fecha, tipo, categoria ?? "General")
-      : new Egreso(id, Number(monto), descripcion, fecha, tipo, categoria ?? "General");
+  let nuevo;
 
+  if (tipo === "ingreso") {
+    nuevo = new Ingreso(id, Number(monto), descripcion, fecha, tipo, categoria ?? "General");
+  } else {
+    nuevo = new Egreso(id, Number(monto), descripcion, fecha, tipo, categoria ?? "General");
+  }
   historialMovimientos.push(nuevo);
   res.status(201).json(mapMovimiento(nuevo));
 });
 
-// DELETE /movimientos/:id
+// borra
 router.delete("/:id", (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const existia = historialMovimientos.some((m) => m.getId() === id);
@@ -67,5 +66,4 @@ router.delete("/:id", (req: Request, res: Response) => {
   historialMovimientos = historialMovimientos.filter((m) => m.getId() !== id);
   res.status(200).json({ mensaje: "Movimiento eliminado" });
 });
-
 export default router;
