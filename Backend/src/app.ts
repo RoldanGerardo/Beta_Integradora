@@ -14,7 +14,7 @@ app.use(express.json());
 app.use("/movimientos", movimientoRoutes);
 app.use("/educativo", educativoRoutes);
 app.use("/informes", informesRoutes);
-app.use("/", crudRoutes);
+app.use("/admin", crudRoutes);
 app.get("/", (req, res) => {
     res.json({ mensaje: "Backend Beta funcionando correctamente" });
 });
