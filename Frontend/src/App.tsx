@@ -7,6 +7,7 @@ import LandingPage from "./Components/LandingPage";
 import Dashboard  from "./Components/Dashboard";
 import Registro   from "./Components/Registro";
 import Login      from "./Components/Login";
+import MovimientosManager from "./Components/MovimientosManager"; // <-- 1. Nueva importación agregada
 
 export default function App() {
   const [vista, setVista] = useState<string>("casa");
@@ -17,6 +18,7 @@ export default function App() {
       case "dashboard": return <Dashboard   onNavigate={setVista} />;
       case "registro":  return <Registro    onNavigate={setVista} />;
       case "login":     return <Login       onNavigate={setVista} />;
+      case "movimientos": return <MovimientosManager />; // <-- 2. Nueva ruta agregada
       default:
         return (
           <div
