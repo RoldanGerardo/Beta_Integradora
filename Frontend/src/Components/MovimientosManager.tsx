@@ -1,6 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/Components/MovimientosManager.tsx
-───────────────────────────────────────────────── */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   ChevronLeft, ChevronRight, Wallet, Mail, HelpCircle,
@@ -16,7 +13,6 @@ interface MovimientosProps {
   onNavigate?: (vista: string) => void;
 }
 
-/* Ícono por categoría */
 const categoriaIconos: Record<string, React.ElementType> = {
   Becas: GraduationCap,
   Mesada: Wallet,
@@ -30,7 +26,6 @@ const categoriaIconos: Record<string, React.ElementType> = {
   Ropa: Shirt,
 };
 
-/* Hook: anima un número desde su valor previo hasta `valor` */
 function useCountUp(valor: number, duracion = 500) {
   const [display, setDisplay] = useState(valor);
   const anterior = useRef(valor);
@@ -77,7 +72,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
   const [error, setError] = useState<string | null>(null);
   const [eliminandoId, setEliminandoId] = useState<number | null>(null);
 
-  // Carga inicial / al cambiar de vista (ingresos <-> egresos)
   useEffect(() => {
     if (tipoVista === "balance") return;
 
@@ -98,7 +92,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
       });
 
     return () => { activo = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipoVista]);
 
   const saldoTotal = useMemo(
@@ -119,7 +112,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
       categoria: categoriaSeleccionada,
     };
 
-    // Reflejo optimista mientras se guarda en el backend
     const idTemporal = Date.now();
     setHistorial((prev) => [{ ...datos, id: idTemporal }, ...prev]);
     setNombre("");
@@ -129,12 +121,12 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
 
     try {
       const guardadoReal = await crearMovimiento(datos);
-      // Reemplaza el id temporal por el real que asigna el backend
+
       setHistorial((prev) =>
         prev.map((m) => (m.id === idTemporal ? guardadoReal : m))
       );
     } catch {
-      // Si falla el guardado, quitamos el optimista y avisamos
+
       setHistorial((prev) => prev.filter((m) => m.id !== idTemporal));
       setError("No se pudo guardar el movimiento. Intenta de nuevo.");
     }

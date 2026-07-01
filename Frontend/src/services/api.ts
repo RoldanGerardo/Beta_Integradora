@@ -1,9 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/services/api.ts
-   Cliente central para hablar con el backend de BETA.
-   Todas las pantallas de movimientos usan estas
-   funciones en lugar de llamar fetch() directamente.
-───────────────────────────────────────────────── */
 import { Movimiento } from "../models/Movimiento";
 
 export const API_URL = "http://localhost:3000";
