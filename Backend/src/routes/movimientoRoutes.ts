@@ -19,9 +19,9 @@ router.post("/", (req, res) => {
     let nuevoMovimiento;
 
     if (tipo === "ingreso") {
-        nuevoMovimiento = new Ingreso(Date.now(), Number(monto), descripcion, fecha);
+        nuevoMovimiento = new Ingreso(Date.now(), Number(monto), descripcion, fecha , tipo);
     } else {
-        nuevoMovimiento = new Egreso(Date.now(), Number(monto), descripcion, fecha);
+        nuevoMovimiento = new Egreso(Date.now(), Number(monto), descripcion, fecha, tipo);
     }
 
     manager.agregarMovimiento(nuevoMovimiento);
