@@ -5,4 +5,5 @@ export interface Movimiento {
   monto: number;       
   descripcion: string;  
   fecha: string;
+  tipo: string;
 }
