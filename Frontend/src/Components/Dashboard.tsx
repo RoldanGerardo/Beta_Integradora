@@ -1,7 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/Components/Dashboard.tsx
-   Panel principal del usuario autenticado en BETA
-   ───────────────────────────────────────────────── */
 import { Mail, HelpCircle, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, CheckCircle, Circle } from "lucide-react";
 import BetaLogo from "./BetaLogo";
 
@@ -19,7 +15,6 @@ const movCards = [
     border: "#84D175",
     color: "#707D4E",
     Icon: TrendingUp,
-    // img: "/assets/billetes-ilu.svg"  ← reemplaza cuando tengas el SVG
   },
   {
     label: "Egresos del mes",
@@ -30,7 +25,6 @@ const movCards = [
     border: "#F8910C",
     color: "#AE6D21",
     Icon: TrendingDown,
-    // img: "/assets/monedas-bajan-ilu.svg"
   },
   {
     label: "Últimos movimientos",
@@ -41,7 +35,6 @@ const movCards = [
     border: "#668EA5",
     color: "#12263A",
     Icon: ArrowUpRight,
-    // img: "/assets/historial-ilu.svg"
   },
 ];
 
@@ -144,7 +137,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           {/* Decoración fondo */}
           <div
             className="absolute right-[-30px] top-[-30px] w-36 h-36 rounded-full pointer-events-none"
-            style={{ background: "#405FFA", opacity: .07 }}
+            style={{ background: "#405FFA", opacity: 0.07 }}
           />
         </div>
 
@@ -214,7 +207,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             </button>
             <div
               className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full pointer-events-none"
-              style={{ background: "#84D175", opacity: .10 }}
+              style={{ background: "#84D175", opacity: 0.10 }}
             />
           </div>
 
