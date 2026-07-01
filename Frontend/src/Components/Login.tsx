@@ -1,6 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/Components/Login.tsx
-   ───────────────────────────────────────────────── */
 import { useState } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import BetaLogo from "./BetaLogo";
@@ -37,12 +34,11 @@ export default function Login({ onNavigate }: Props) {
         style={{ minHeight: 480 }}
       >
 
-        {/* ── LADO IZQUIERDO decorativo ── */}
         <div
           className="hidden md:flex w-2/5 flex-col items-center justify-center relative overflow-hidden p-8"
           style={{ background: "linear-gradient(160deg, #FFFACB 0%, #BDE2F2 100%)" }}
         >
-          {/* Semicírculo decorativo */}
+        
           <div
             className="absolute left-[-30%] top-1/2 -translate-y-1/2 rounded-full pointer-events-none"
             style={{
@@ -52,19 +48,16 @@ export default function Login({ onNavigate }: Props) {
             }}
           />
 
-          {/* Ilustración SVG — reemplaza con <img src="/assets/login-illu.svg"> cuando tengas el archivo */}
           <div className="relative z-10 mb-5">
             <svg viewBox="0 0 120 120" fill="none" width="110" height="110">
               {/* Fondo circular */}
               <circle cx="60" cy="60" r="54" fill="rgba(64,95,250,0.08)" stroke="rgba(64,95,250,0.18)" strokeWidth="1"/>
-              {/* Monedas apiladas */}
               <ellipse cx="60" cy="82" rx="22" ry="7" fill="#FABE0B" opacity=".9"/>
               <ellipse cx="60" cy="76" rx="22" ry="7" fill="#F8910C" opacity=".85"/>
               <ellipse cx="60" cy="70" rx="22" ry="7" fill="#FABE0B" opacity=".9"/>
               {/* Flecha hacia arriba */}
               <path d="M60 58 L60 32" stroke="#405FFA" strokeWidth="2.5" strokeLinecap="round"/>
               <path d="M50 42 L60 32 L70 42" stroke="#405FFA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              {/* Destellos */}
               <circle cx="36" cy="36" r="3" fill="#FABE0B" opacity=".7"/>
               <circle cx="86" cy="42" r="2" fill="#84D175" opacity=".7"/>
               <circle cx="82" cy="28" r="1.5" fill="#F8910C" opacity=".6"/>
@@ -86,7 +79,6 @@ export default function Login({ onNavigate }: Props) {
               Accede a tu simulador para seguir administrando tus finanzas y ver tu progreso.
             </p>
 
-            {/* Mini stats */}
             <div className="flex gap-3 justify-center pt-1">
               {[["🎯","Meta activa"],["📈","Progreso guardado"]].map(([icon, lbl]) => (
                 <div
@@ -101,12 +93,10 @@ export default function Login({ onNavigate }: Props) {
           </div>
         </div>
 
-        {/* ── LADO DERECHO: Formulario ── */}
         <div
           className="flex-1 flex flex-col justify-center p-8 lg:p-10"
           style={{ background: "white" }}
         >
-          {/* Logo / ícono superior */}
           <div className="flex justify-center mb-5">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm"
@@ -129,7 +119,6 @@ export default function Login({ onNavigate }: Props) {
             Ingresa tus credenciales para continuar
           </p>
 
-          {/* Error */}
           {error && (
             <div
               className="mb-4 px-4 py-2 rounded-xl text-[12px] font-medium"
@@ -141,7 +130,6 @@ export default function Login({ onNavigate }: Props) {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
 
-            {/* Email */}
             <div>
               <label
                 className="block text-[10px] font-bold uppercase tracking-widest mb-1.5"
@@ -165,7 +153,6 @@ export default function Login({ onNavigate }: Props) {
               />
             </div>
 
-            {/* Contraseña */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label
@@ -209,7 +196,6 @@ export default function Login({ onNavigate }: Props) {
               </div>
             </div>
 
-            {/* Botón principal */}
             <button
               type="submit"
               disabled={loading}
@@ -227,7 +213,6 @@ export default function Login({ onNavigate }: Props) {
               )}
             </button>
 
-            {/* Divisor */}
             <div className="flex items-center gap-3 my-1">
               <div className="flex-1 h-px" style={{ background: "rgba(18,38,58,0.08)" }}/>
               <span className="text-[11px]" style={{ color: "#668EA5" }}>o</span>

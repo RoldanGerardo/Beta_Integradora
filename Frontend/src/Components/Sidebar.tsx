@@ -1,6 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/Components/Sidebar.tsx
-   ───────────────────────────────────────────────── */
 import { useState } from "react";
 import {
   Home, Mail, ChevronLeft, LogIn, UserPlus,
@@ -14,10 +11,6 @@ type SidebarProps = {
   cambiarVista: (vista: string) => void;
 };
 
-/* ── Vistas que pertenecen al área autenticada.
-   Cualquier vista en esta lista mostrará el sidebar de
-   dashboard (perfil, notificaciones, menú con submenús),
-   en lugar del sidebar público. ───────────────────────── */
 const VISTAS_AUTENTICADAS = [
   "dashboard",
   "ingresos",
@@ -30,10 +23,6 @@ const VISTAS_AUTENTICADAS = [
   "reportes",
 ];
 
-/* ── Ilustración SVG sidebar público ─────────────────────────
-   Gráfica de barras colorida con pajarito BETA volando.
-   Para reemplazar: <img src="/assets/sidebar-illu.png" ... />
-   ─────────────────────────────────────────────────────────── */
 function SidebarIllu() {
   return (
     <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +72,6 @@ function SidebarIllu() {
   );
 }
 
-/* ── Ilustración mini para sidebar colapsado ───────────────── */
 function MiniIllu() {
   return (
     <div className="flex flex-col items-center gap-1 py-3">
@@ -95,9 +83,6 @@ function MiniIllu() {
   );
 }
 
-/* ══════════════════════════════════════════════════════════════
-   SIDEBAR DASHBOARD (usuario logueado)
-   ══════════════════════════════════════════════════════════════ */
 function SidebarDashboard({
   collapsed, setCollapsed, cambiarVista, vistaActual,
 }: {
@@ -134,7 +119,6 @@ function SidebarDashboard({
     { label: "Acerca de", Icon: Info, color: "#668EA5", vista: "acerca", sub: [] },
   ];
 
-  // El menú que contiene la vista activa empieza abierto
   const menuActivo = menuItems.find((m) => m.sub.some((s) => s.vista === vistaActual))?.label ?? null;
   const [openMenu, setOpenMenu] = useState<string | null>(menuActivo);
 
@@ -148,7 +132,6 @@ function SidebarDashboard({
         fontFamily: "'Inter',sans-serif",
       }}
     >
-      {/* Header */}
       <div className="flex items-center justify-between p-3.5 min-h-[60px]">
         {!collapsed && (
           <div className="flex items-center gap-2 overflow-hidden">
@@ -171,12 +154,10 @@ function SidebarDashboard({
         </button>
       </div>
 
-      {/* Perfil */}
       {!collapsed ? (
         <div className="mx-3 mb-3 p-3 rounded-2xl bg-white/60 border border-black/5 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#405FFA] flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
             U
-            {/* Reemplaza con: <img src="/assets/avatar.png" className="w-full h-full rounded-full object-cover" /> */}
           </div>
           <div className="overflow-hidden">
             <div className="text-[12px] font-bold text-[#12263A] truncate">usuario_67</div>
@@ -194,7 +175,6 @@ function SidebarDashboard({
         </div>
       )}
 
-      {/* Nav */}
       <nav className="flex-1 px-2.5 overflow-y-auto space-y-0.5">
         {menuItems.map(({ label, Icon, color, vista, sub }) => {
           const activoDirecto = vista !== "" && vistaActual === vista;
@@ -236,7 +216,6 @@ function SidebarDashboard({
                 )}
               </button>
 
-              {/* Submenú */}
               {!collapsed && openMenu === label && sub.length > 0 && (
                 <div className="pl-9 pr-2 pb-1 space-y-0.5">
                   {sub.map((s) => {
@@ -269,7 +248,6 @@ function SidebarDashboard({
         })}
       </nav>
 
-      {/* Footer: Configuración + Salir */}
       <div className="p-2.5 space-y-0.5" style={{ borderTop: "1px solid rgba(18,38,58,0.07)" }}>
         <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[12px] text-[#668EA5] hover:bg-black/5 transition-colors">
           <Settings size={15} />
@@ -287,15 +265,9 @@ function SidebarDashboard({
   );
 }
 
-/* ══════════════════════════════════════════════════════════════
-   SIDEBAR PÚBLICO (landing, login, registro)
-   ══════════════════════════════════════════════════════════════ */
 export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
-  // 🔧 FIX: antes solo se comparaba con "dashboard", así que al entrar a
-  // "ingresos" / "egresos" / "balance" (u otras vistas autenticadas) el
-  // sidebar caía al de visitante y parecía que habías cerrado sesión.
   if (VISTAS_AUTENTICADAS.includes(vistaActual)) {
     return (
       <SidebarDashboard
@@ -381,7 +353,6 @@ export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
         })}
       </nav>
 
-      {/* ── Ilustración sidebar ── */}
       {!collapsed ? (
         <div className="mx-3 mb-3 rounded-2xl overflow-hidden border border-black/5 shadow-sm" style={{ height: 160 }}>
           <SidebarIllu />

@@ -53,7 +53,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       className="min-h-screen flex flex-col"
       style={{ background: "#FFFACB", fontFamily: "'Space Grotesk',sans-serif" }}
     >
-      {/* ── TOP BAR ── */}
       <header
         className="flex items-center justify-between px-8 py-3 flex-shrink-0"
         style={{ background: "#F4EDEA", borderBottom: "1px solid rgba(18,38,58,0.07)" }}
@@ -81,10 +80,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       </header>
 
-      {/* ── CONTENIDO PRINCIPAL ── */}
       <div className="flex-1 px-8 py-6 flex flex-col gap-5 overflow-y-auto max-w-5xl w-full mx-auto">
 
-        {/* ── META DE AHORRO ── */}
         <div
           className="rounded-2xl p-5 flex items-center gap-5 relative overflow-hidden"
           style={{ background: "#BDE2F2", border: "1px solid rgba(102,142,165,0.25)" }}
@@ -95,8 +92,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             style={{ background: "#405FFA" }}
           >
             U
-            {/* Reemplaza con tu imagen:
-            <img src="/assets/avatar.png" className="w-full h-full rounded-full object-cover" /> */}
           </div>
 
           <div className="flex-1 z-10">
@@ -116,7 +111,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 {savingPct}%
               </div>
             </div>
-            {/* Barra de progreso */}
             <div
               className="w-full rounded-full h-3 overflow-hidden"
               style={{ background: "rgba(255,255,255,0.6)" }}
@@ -134,14 +128,12 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             </div>
           </div>
 
-          {/* Decoración fondo */}
           <div
             className="absolute right-[-30px] top-[-30px] w-36 h-36 rounded-full pointer-events-none"
             style={{ background: "#405FFA", opacity: 0.07 }}
           />
         </div>
 
-        {/* ── TARJETAS DE MOVIMIENTOS ── */}
         <div className="grid grid-cols-3 gap-4">
           {movCards.map(({ label, amount, change, up, bg, border, color, Icon }) => (
             <div
@@ -172,10 +164,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           ))}
         </div>
 
-        {/* ── FILA INFERIOR: Consejo + Cuestionarios ── */}
         <div className="grid grid-cols-2 gap-4">
 
-          {/* Consejo del día */}
           <div
             className="rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden"
             style={{ background: "#E6FBDA", border: "1px solid rgba(132,209,117,0.30)" }}
@@ -211,7 +201,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             />
           </div>
 
-          {/* Cuestionarios */}
           <div
             className="rounded-2xl p-5 flex flex-col gap-3"
             style={{
@@ -262,7 +251,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           </div>
         </div>
 
-        {/* ── ETIQUETA SALUD FINANCIERA ── */}
         <div className="flex items-center gap-3">
           <div
             className="px-5 py-2 rounded-full text-[13px] font-bold"
@@ -278,7 +266,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
       </div>
 
-      {/* ── FOOTER ── */}
       <footer
         className="flex items-center justify-between px-8 py-3 flex-shrink-0"
         style={{

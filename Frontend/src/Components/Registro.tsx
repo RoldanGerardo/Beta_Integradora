@@ -1,6 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/Components/Registro.tsx
-   ───────────────────────────────────────────────── */
 import { useState } from "react";
 import { Eye, EyeOff, ArrowRight, Check } from "lucide-react";
 import BetaLogo from "./BetaLogo";
@@ -52,12 +49,11 @@ export default function Registro({ onNavigate }: Props) {
         style={{ minHeight: 520 }}
       >
 
-        {/* ── LADO IZQUIERDO decorativo ── */}
         <div
           className="hidden md:flex w-2/5 flex-col items-center justify-center relative overflow-hidden p-8"
           style={{ background: "linear-gradient(160deg, #E6FBDA 0%, #BDE2F2 100%)" }}
         >
-          {/* Semicírculo decorativo */}
+       
           <div
             className="absolute left-[-30%] top-1/2 -translate-y-1/2 rounded-full pointer-events-none"
             style={{
@@ -67,7 +63,6 @@ export default function Registro({ onNavigate }: Props) {
             }}
           />
 
-          {/* Ilustración SVG — reemplaza con <img src="/assets/registro-illu.svg"> */}
           <div className="relative z-10 mb-5">
             <svg viewBox="0 0 120 120" fill="none" width="110" height="110">
               <circle cx="60" cy="60" r="54" fill="rgba(132,209,117,0.10)" stroke="rgba(132,209,117,0.25)" strokeWidth="1"/>
@@ -106,7 +101,7 @@ export default function Registro({ onNavigate }: Props) {
             >
               Crea tu cuenta en segundos y empieza a hacer que el dinero trabaje para ti.
             </p>
-            {/* Mini beneficios */}
+           
             <div className="space-y-1.5 pt-1 text-left">
               {["100% gratuito","Sin conexión a bancos","Aprendizaje paso a paso"].map(b => (
                 <div key={b} className="flex items-center gap-2">
@@ -125,12 +120,10 @@ export default function Registro({ onNavigate }: Props) {
           </div>
         </div>
 
-        {/* ── LADO DERECHO: Formulario ── */}
         <div
           className="flex-1 flex flex-col justify-center p-8 lg:p-10"
           style={{ background: "white" }}
         >
-          {/* Ícono superior */}
           <div className="flex justify-center mb-4">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm"
@@ -153,7 +146,6 @@ export default function Registro({ onNavigate }: Props) {
             Es gratis y toma menos de un minuto
           </p>
 
-          {/* Error */}
           {error && (
             <div
               className="mb-4 px-4 py-2 rounded-xl text-[12px] font-medium"
@@ -169,7 +161,6 @@ export default function Registro({ onNavigate }: Props) {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
 
-            {/* Nombre + Username en fila */}
             <div className="grid grid-cols-2 gap-4">
               {[
                 { key: "nombre",   type: "text", placeholder: "Nombre completo" },
@@ -200,7 +191,6 @@ export default function Registro({ onNavigate }: Props) {
               ))}
             </div>
 
-            {/* Email */}
             <div>
               <label
                 className="block text-[10px] font-bold uppercase tracking-widest mb-1"
@@ -224,7 +214,6 @@ export default function Registro({ onNavigate }: Props) {
               />
             </div>
 
-            {/* Contraseña + indicador de fuerza */}
             <div>
               <label
                 className="block text-[10px] font-bold uppercase tracking-widest mb-1"
@@ -256,7 +245,7 @@ export default function Registro({ onNavigate }: Props) {
                   {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
                 </button>
               </div>
-              {/* Barra de fuerza */}
+             
               {form.password.length > 0 && (
                 <div className="mt-1.5 flex items-center gap-2">
                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(18,38,58,0.08)" }}>
@@ -272,7 +261,6 @@ export default function Registro({ onNavigate }: Props) {
               )}
             </div>
 
-            {/* Botón */}
             <button
               type="submit"
               disabled={loading}
@@ -286,7 +274,6 @@ export default function Registro({ onNavigate }: Props) {
               {loading ? "Creando cuenta..." : <> CREAR CUENTA <ArrowRight size={16}/> </>}
             </button>
 
-            {/* Divisor */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px" style={{ background: "rgba(18,38,58,0.08)" }}/>
               <span className="text-[11px]" style={{ color: "#668EA5" }}>o</span>

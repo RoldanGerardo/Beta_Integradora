@@ -1,6 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/App.tsx
-   ───────────────────────────────────────────────── */
 import { useState } from "react";
 import Sidebar from "./Components/Sidebar";
 import LandingPage from "./Components/LandingPage";
@@ -19,7 +16,6 @@ export default function App() {
       case "registro": return <Registro onNavigate={setVista} />;
       case "login": return <Login onNavigate={setVista} />;
 
-      // 🔥 RUTAS SEGÚN EL SUBMENÚ DEL SIDEBAR 🔥
       case "ingresos": return <MovimientosManager tipoVista="ingresos" onNavigate={setVista} />;
       case "egresos": return <MovimientosManager tipoVista="egresos" onNavigate={setVista} />;
       case "balance": return <MovimientosManager tipoVista="balance" onNavigate={setVista} />;

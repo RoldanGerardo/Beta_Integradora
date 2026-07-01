@@ -1,21 +1,9 @@
-/* ─────────────────────────────────────────────────
-   src/Components/LandingPage.tsx
-   Landing page pública de BETA:
-     1. Hero – título, eyebrow, botones
-     2. Quiénes somos – texto + ilustración SVG
-     3. Qué ofrecemos – 3 círculos interactivos
-     4. CTA strip – llamada a la acción final
-   ───────────────────────────────────────────────── */
 import { useState } from "react";
 
 type LandingPageProps = {
   onNavigate: (vista: string) => void;
 };
 
-/* ── Ilustraciones SVG de los círculos ─────────────────────────
-   Para reemplazar cada icono: cambia el <svg> por un <img>
-   ej: <img src="/assets/icon-educacion.png" width={48} alt="" />
-   ─────────────────────────────────────────────────────────────*/
 function IcoEducacion() {
   return (
     <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
@@ -59,9 +47,6 @@ function IcoReportes() {
   );
 }
 
-/* ── Ilustración "Quiénes somos" ────────────────────────────────
-   Para reemplazar: <img src="/assets/equipo.jpg" className="w-full rounded-2xl" alt="Equipo BETA" />
-   ─────────────────────────────────────────────────────────────*/
 function QuienesSomosIllu() {
   return (
     <svg viewBox="0 0 200 154" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
@@ -92,7 +77,6 @@ function QuienesSomosIllu() {
   );
 }
 
-/* ── Círculo de oferta ─────────────────────────────────────────*/
 type OfferCircle = {
   Icono: () => JSX.Element;
   bg: string;
@@ -137,12 +121,10 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
   return (
     <main className="flex-1 overflow-y-auto min-w-0" style={{ background: "#FFFACB" }}>
 
-      {/* ── HERO ── */}
       <section
         className="px-10 pt-9 pb-8 relative overflow-hidden"
         style={{ background: "linear-gradient(158deg, #FFFACB 0%, #FFF6E0 100%)" }}
       >
-        {/* Decoración de fondo */}
         <div className="absolute top-[-24px] right-[-20px] opacity-[.16] pointer-events-none">
           <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
             <circle cx="80" cy="80" r="78" stroke="#FABE0B" strokeWidth="1.5" />
@@ -152,7 +134,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </svg>
         </div>
 
-        {/* Eyebrow */}
         <div
           className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4"
           style={{ background: "rgba(250,190,11,0.15)", border: "1px solid rgba(250,190,11,0.35)" }}
@@ -216,10 +197,8 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Divisor */}
       <div style={{ height: 1, margin: "0 40px", background: "rgba(18,38,58,0.08)" }} />
 
-      {/* ── QUIÉNES SOMOS ── */}
       <section
         className="px-10 py-8 grid gap-6 items-center"
         style={{ gridTemplateColumns: "1fr 1fr", background: "#FFFACB" }}
@@ -257,7 +236,6 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           </div>
         </div>
 
-        {/* Imagen/ilustración del equipo — reemplazable */}
         <div
           className="rounded-2xl overflow-hidden"
           style={{ border: "1px solid rgba(18,38,58,0.08)", minHeight: 150 }}
@@ -266,10 +244,8 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Divisor */}
       <div style={{ height: 1, margin: "0 40px", background: "rgba(18,38,58,0.08)" }} />
 
-      {/* ── QUÉ OFRECEMOS — CÍRCULOS ── */}
       <section className="px-10 py-8" style={{ background: "#F4EDEA" }}>
         <p className="text-[10px] font-semibold tracking-[.10em] uppercase mb-2" style={{ color: "#AE6D21" }}>
           Qué ofrecemos
@@ -322,12 +298,10 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── CTA STRIP ── */}
       <section
         className="px-10 py-6 flex items-center gap-5 flex-wrap"
         style={{ background: "#BDE2F2", borderTop: "1px solid rgba(102,142,165,0.22)" }}
       >
-        {/* Icono estrella */}
         <div
           className="w-[58px] h-[58px] rounded-full flex items-center justify-center flex-shrink-0"
           style={{ background: "#FABE0B", border: "2px solid #AE6D21" }}

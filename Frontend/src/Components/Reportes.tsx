@@ -16,7 +16,6 @@ const mockHistorial: Movimiento[] = [
 export default function Reportes({ onNavigate }: Props) {
   const [filtro, setFiltro] = useState<'quincenal' | 'mensual'>('mensual');
 
-  // Lógica de filtrado: si es quincenal, solo muestra los primeros 15 días
   const historialFiltrado = mockHistorial.filter(mov => {
     const dia = parseInt(mov.fecha.split('/')[0]);
     return filtro === 'quincenal' ? dia <= 15 : true;
@@ -65,8 +64,7 @@ export default function Reportes({ onNavigate }: Props) {
               ))}
             </div>
           </div>
-          
-          {/* Tarjeta de Resumen */}
+       
           <div className="bg-white rounded-3xl shadow-sm p-8 grid grid-cols-2 gap-8">
             <div>
               <p>Ingresos: ${ingresos.toFixed(2)}</p>
@@ -80,7 +78,6 @@ export default function Reportes({ onNavigate }: Props) {
         </div>
       </div>
       
-      {/* Footer */}
       <div className="w-full py-4 px-6 flex items-center justify-between bg-[#BDE2F2]">
         <Mail size={20} color="white" />
         <span className="text-white font-bold text-[12px]">BETA: Finanzas para jóvenes</span>

@@ -1,6 +1,3 @@
-/* ─────────────────────────────────────────────────
-   src/Components/MovimientosManager.tsx
-   ───────────────────────────────────────────────── */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   ChevronLeft, ChevronRight, Wallet, Mail, HelpCircle,
@@ -22,7 +19,6 @@ interface MovimientoLocal {
   tipo: string;
 }
 
-/* Ícono por categoría */
 const categoriaIconos: Record<string, React.ElementType> = {
   Becas: GraduationCap,
   Mesada: Wallet,
@@ -36,7 +32,6 @@ const categoriaIconos: Record<string, React.ElementType> = {
   Ropa: Shirt,
 };
 
-/* Hook: anima un número desde su valor previo hasta `valor` */
 function useCountUp(valor: number, duracion = 500) {
   const [display, setDisplay] = useState(valor);
   const anterior = useRef(valor);
@@ -77,18 +72,13 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
   const [nombre, setNombre] = useState("");
   const [monto, setMonto] = useState("");
   const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
-
-  // 🧩 Estado local: fuente de verdad mientras el backend no está listo.
-  // Así la lista y el saldo reaccionan al instante al guardar, sin
-  // depender de que exista/funcione el endpoint todavía.
   const [historial, setHistorial] = useState<MovimientoLocal[]>([]);
   const [guardado, setGuardado] = useState(false);
 
   useEffect(() => {
     setCategoriaSeleccionada(categorias[0]);
     setHistorial([]);
-    // Intento silencioso de sincronizar con el backend si ya existe;
-    // si falla (aún no está listo) simplemente seguimos en modo local.
+    
     (async () => {
       try {
         const response = await fetch("http://localhost:5000/api/movimientos");
@@ -109,7 +99,7 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         // backend no disponible todavía — nos quedamos en modo local
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [tipoVista]);
 
   const saldoTotal = useMemo(
@@ -130,15 +120,12 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
       tipo: categoriaSeleccionada,
     };
 
-    // 1) Reflejo inmediato en la UI (optimista)
     setHistorial((prev) => [nuevo, ...prev]);
     setNombre("");
     setMonto("");
     setGuardado(true);
     setTimeout(() => setGuardado(false), 1600);
 
-    // 2) Intento en segundo plano de guardar en el backend, sin bloquear
-    //    ni depender de su respuesta para que la pantalla se actualice.
     fetch("http://localhost:5000/api/movimientos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -150,7 +137,7 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         categoria: isIngreso ? "ingreso" : "egreso",
       }),
     }).catch(() => {
-      // backend no disponible todavía — no pasa nada, ya se ve en pantalla
+      
     });
   };
 
@@ -176,7 +163,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         @keyframes checkPop { 0% { transform: scale(.6); opacity:0; } 60% { transform: scale(1.15); opacity:1; } 100% { transform: scale(1); opacity:1; } }
       `}</style>
 
-      {/* ── TOP BAR ── */}
       <header
         className="flex items-center justify-between px-8 py-3 flex-shrink-0"
         style={{ background: "#F4EDEA", borderBottom: "1px solid rgba(18,38,58,0.07)" }}
@@ -205,10 +191,8 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         </div>
       </header>
 
-      {/* ── CONTENIDO ── */}
       <div className="flex-1 px-8 py-6 flex flex-col gap-5 overflow-y-auto max-w-5xl w-full mx-auto">
 
-        {/* Saldo / total */}
         <div
           className="rounded-2xl p-5 flex items-center gap-5 relative overflow-hidden transition-shadow duration-300 hover:shadow-md"
           style={{ background: tema.bg, border: `1px solid ${tema.border}40` }}
@@ -236,7 +220,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           />
         </div>
 
-        {/* Categorías */}
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-3" style={{ color: "#668EA5" }}>
             Categorías
@@ -286,7 +269,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           </div>
         </div>
 
-        {/* Formulario + Lista */}
         <div className="grid md:grid-cols-2 gap-5">
           {/* Formulario */}
           <div className="bg-white rounded-2xl p-6 transition-shadow duration-300 hover:shadow-md" style={{ border: "1px solid rgba(18,38,58,0.06)" }}>
@@ -379,7 +361,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
             </form>
           </div>
 
-          {/* Lista */}
           <div className="bg-white rounded-2xl p-6 transition-shadow duration-300 hover:shadow-md" style={{ border: "1px solid rgba(18,38,58,0.06)" }}>
             <h3 className="font-bold text-[15px] mb-5 tracking-tight" style={{ color: "#12263A" }}>
               Historial de {tipoVista}
@@ -425,7 +406,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           </div>
         </div>
 
-        {/* Consejo */}
         <div
           className="rounded-2xl p-5 flex items-center gap-3 relative overflow-hidden transition-shadow duration-300 hover:shadow-md"
           style={{ background: tema.bg, border: `1px solid ${tema.border}40` }}
@@ -441,7 +421,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
         </div>
       </div>
 
-      {/* ── FOOTER ── */}
       <footer
         className="flex items-center justify-between px-8 py-3 flex-shrink-0"
         style={{ background: "#BDE2F2", borderTop: "1px solid rgba(18,38,58,0.08)" }}

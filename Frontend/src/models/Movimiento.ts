@@ -1,5 +1,3 @@
-// src/models/Movimiento.ts
-
 export interface Movimiento {
   id?: number;          
   monto: number;       
