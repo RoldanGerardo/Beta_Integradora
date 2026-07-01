@@ -4,7 +4,7 @@
 import { useState } from "react";
 import {
   Home, Mail, ChevronLeft, LogIn, UserPlus,
-  Settings, FileText, PieChart, Info,
+  Settings, PieChart, Info,
   BookOpen, Activity, Bell, LogOut,
 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
@@ -13,6 +13,22 @@ type SidebarProps = {
   vistaActual: string;
   cambiarVista: (vista: string) => void;
 };
+
+/* ── Vistas que pertenecen al área autenticada.
+   Cualquier vista en esta lista mostrará el sidebar de
+   dashboard (perfil, notificaciones, menú con submenús),
+   en lugar del sidebar público. ───────────────────────── */
+const VISTAS_AUTENTICADAS = [
+  "dashboard",
+  "ingresos",
+  "egresos",
+  "balance",
+  "cuestionarios",
+  "articulos",
+  "quincenales",
+  "mensuales",
+  "reportes",
+];
 
 /* ── Ilustración SVG sidebar público ─────────────────────────
    Gráfica de barras colorida con pajarito BETA volando.
@@ -23,53 +39,41 @@ function SidebarIllu() {
     <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full" aria-hidden="true">
       <rect width="200" height="160" fill="#F4EDEA" />
-      {/* Cielo suave */}
       <rect width="200" height="80" fill="#BDE2F2" opacity=".20" />
-      {/* Sol */}
       <circle cx="168" cy="28" r="18" fill="#FABE0B" opacity=".22" />
       <circle cx="168" cy="28" r="11" fill="#FABE0B" opacity=".40" />
-      {/* Nubes */}
       <ellipse cx="42" cy="24" rx="18" ry="8" fill="white" opacity=".60" />
       <ellipse cx="56" cy="20" rx="13" ry="7" fill="white" opacity=".50" />
       <ellipse cx="118" cy="18" rx="14" ry="6" fill="white" opacity=".40" />
-      {/* Barras */}
       {[
-        { x:22,  h:44, y:90,  c:"#BDE2F2" },
-        { x:44,  h:56, y:78,  c:"#FABE0B" },
-        { x:66,  h:68, y:66,  c:"#26CBD1" },
-        { x:88,  h:50, y:84,  c:"#84D175" },
-        { x:110, h:74, y:60,  c:"#F8910C" },
-        { x:132, h:60, y:74,  c:"#668EA5" },
-        { x:154, h:46, y:88,  c:"#FABE0B" },
+        { x: 22, h: 44, y: 90, c: "#BDE2F2" },
+        { x: 44, h: 56, y: 78, c: "#FABE0B" },
+        { x: 66, h: 68, y: 66, c: "#26CBD1" },
+        { x: 88, h: 50, y: 84, c: "#84D175" },
+        { x: 110, h: 74, y: 60, c: "#F8910C" },
+        { x: 132, h: 60, y: 74, c: "#668EA5" },
+        { x: 154, h: 46, y: 88, c: "#FABE0B" },
       ].map((b) => (
         <rect key={b.x} x={b.x} y={b.y} width="16" height={b.h} rx="4" fill={b.c} />
       ))}
-      {/* Línea base */}
-      <line x1="16" y1="136" x2="178" y2="136"
-        stroke="#12263A" strokeWidth="1" opacity=".08" />
-      {/* Línea de tendencia */}
+      <line x1="16" y1="136" x2="178" y2="136" stroke="#12263A" strokeWidth="1" opacity=".08" />
       <polyline
         points="30,110 52,90 74,76 96,96 118,66 140,82 162,100"
         fill="none" stroke="#F8910C" strokeWidth="2"
         strokeLinecap="round" strokeLinejoin="round" opacity=".70" />
-      {[[30,110],[52,90],[74,76],[96,96],[118,66],[140,82]].map(([cx,cy],i) => (
+      {[[30, 110], [52, 90], [74, 76], [96, 96], [118, 66], [140, 82]].map(([cx, cy], i) => (
         <circle key={i} cx={cx} cy={cy} r="3" fill="#F8910C" />
       ))}
-      {/* Pajarito BETA */}
       <g transform="translate(80,38) rotate(-10)">
         <path d="M0 0 C-7 -4 -13 -2 -15 2 C-11 0 -8 1 -6 3 Z" fill="#405FFA" />
         <path d="M0 0 C-5 -2 -8 0 -6 3 Z" fill="#6B83FB" opacity=".7" />
         <circle cx="2.5" cy="-1" r="3" fill="#405FFA" />
         <path d="M4 -1.5 L7.5 -0.5 L4 0.5Z" fill="#12263A" />
       </g>
-      {/* Monedas */}
       <circle cx="52" cy="44" r="6" fill="#FABE0B" opacity=".75" />
-      <text x="52" y="48" textAnchor="middle" fontSize="7"
-        fontWeight="700" fill="#AE6D21">$</text>
+      <text x="52" y="48" textAnchor="middle" fontSize="7" fontWeight="700" fill="#AE6D21">$</text>
       <circle cx="140" cy="36" r="5" fill="#84D175" opacity=".70" />
-      <text x="140" y="40" textAnchor="middle" fontSize="6"
-        fontWeight="700" fill="#707D4E">$</text>
-      {/* Label */}
+      <text x="140" y="40" textAnchor="middle" fontSize="6" fontWeight="700" fill="#707D4E">$</text>
       <text x="100" y="150" textAnchor="middle"
         fontFamily="Space Grotesk,sans-serif" fontSize="8"
         fontWeight="600" fill="#12263A" opacity=".35">
@@ -83,7 +87,7 @@ function SidebarIllu() {
 function MiniIllu() {
   return (
     <div className="flex flex-col items-center gap-1 py-3">
-      {["#FABE0B","#26CBD1","#84D175","#F8910C"].map((c, i) => (
+      {["#FABE0B", "#26CBD1", "#84D175", "#F8910C"].map((c, i) => (
         <div key={i} className="w-7 rounded-full"
           style={{ height: 6 + i * 3, background: c, opacity: .75 }} />
       ))}
@@ -95,25 +99,44 @@ function MiniIllu() {
    SIDEBAR DASHBOARD (usuario logueado)
    ══════════════════════════════════════════════════════════════ */
 function SidebarDashboard({
-  collapsed, setCollapsed, cambiarVista,
+  collapsed, setCollapsed, cambiarVista, vistaActual,
 }: {
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
   cambiarVista: (v: string) => void;
+  vistaActual: string;
 }) {
   const menuItems = [
-    { label: "Inicio",           Icon: Home,      color: "#405FFA", sub: [] },
-    { label: "Movimientos",      Icon: Activity,  color: "#84D175",
-      sub: ["Ingresos","Egresos","Balance"] },
-    { label: "Módulo educativo", Icon: BookOpen,  color: "#FABE0B",
-      sub: ["Cuestionarios","Artículos"] },
-    { label: "Reportes",         Icon: PieChart,  color: "#F8910C",
-      sub: ["Quincenales","Mensuales"] },
-    { label: "Contáctanos",      Icon: Mail,      color: "#668EA5", sub: [] },
-    { label: "Acerca de",        Icon: Info,      color: "#668EA5", sub: [] },
+    { label: "Inicio", Icon: Home, color: "#405FFA", vista: "dashboard", sub: [] as { label: string; vista: string }[] },
+    {
+      label: "Movimientos", Icon: Activity, color: "#84D175", vista: "",
+      sub: [
+        { label: "Ingresos", vista: "ingresos" },
+        { label: "Egresos", vista: "egresos" },
+        { label: "Balance", vista: "balance" },
+      ],
+    },
+    {
+      label: "Módulo educativo", Icon: BookOpen, color: "#FABE0B", vista: "",
+      sub: [
+        { label: "Cuestionarios", vista: "cuestionarios" },
+        { label: "Artículos", vista: "articulos" },
+      ],
+    },
+    {
+      label: "Reportes", Icon: PieChart, color: "#F8910C", vista: "",
+      sub: [
+        { label: "Quincenales", vista: "quincenales" },
+        { label: "Mensuales", vista: "mensuales" },
+      ],
+    },
+    { label: "Contáctanos", Icon: Mail, color: "#668EA5", vista: "contacto", sub: [] },
+    { label: "Acerca de", Icon: Info, color: "#668EA5", vista: "acerca", sub: [] },
   ];
 
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  // El menú que contiene la vista activa empieza abierto
+  const menuActivo = menuItems.find((m) => m.sub.some((s) => s.vista === vistaActual))?.label ?? null;
+  const [openMenu, setOpenMenu] = useState<string | null>(menuActivo);
 
   return (
     <aside
@@ -173,51 +196,77 @@ function SidebarDashboard({
 
       {/* Nav */}
       <nav className="flex-1 px-2.5 overflow-y-auto space-y-0.5">
-        {menuItems.map(({ label, Icon, color, sub }) => (
-          <div key={label}>
-            <button
-              onClick={() => {
-                if (sub.length) setOpenMenu(openMenu === label ? null : label);
-                else cambiarVista(label.toLowerCase());
-              }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-colors duration-150 text-left group"
-              style={{ color: "#12263A" }}
-              onMouseOver={e => (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)"}
-              onMouseOut={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-            >
-              <Icon size={17} style={{ color, flexShrink: 0 }} />
-              {!collapsed && (
-                <>
-                  <span className="flex-1">{label}</span>
-                  {sub.length > 0 && (
-                    <ChevronLeft
-                      size={13}
-                      style={{
-                        color: "#668EA5",
-                        transform: openMenu === label ? "rotate(-90deg)" : "rotate(-180deg)",
-                        transition: "transform .2s",
-                      }}
-                    />
-                  )}
-                </>
-              )}
-            </button>
-            {/* Submenú */}
+        {menuItems.map(({ label, Icon, color, vista, sub }) => {
+          const activoDirecto = vista !== "" && vistaActual === vista;
+          const activoPorSubmenu = sub.some((s) => s.vista === vistaActual);
+          return (
+            <div key={label}>
+              <button
+                onClick={() => {
+                  if (sub.length) setOpenMenu(openMenu === label ? null : label);
+                  else cambiarVista(vista);
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-colors duration-150 text-left group"
+                style={{
+                  color: activoDirecto || activoPorSubmenu ? "#405FFA" : "#12263A",
+                  background: activoDirecto ? "rgba(64,95,250,0.10)" : "transparent",
+                }}
+                onMouseOver={(e) => {
+                  if (!activoDirecto) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
+                }}
+                onMouseOut={(e) => {
+                  if (!activoDirecto) (e.currentTarget as HTMLElement).style.background = "transparent";
+                }}
+              >
+                <Icon size={17} style={{ color: activoDirecto || activoPorSubmenu ? "#405FFA" : color, flexShrink: 0 }} />
+                {!collapsed && (
+                  <>
+                    <span className="flex-1">{label}</span>
+                    {sub.length > 0 && (
+                      <ChevronLeft
+                        size={13}
+                        style={{
+                          color: "#668EA5",
+                          transform: openMenu === label ? "rotate(-90deg)" : "rotate(-180deg)",
+                          transition: "transform .2s",
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </button>
+
+              {/* Submenú */}
               {!collapsed && openMenu === label && sub.length > 0 && (
-              <div className="pl-9 pr-2 pb-1 space-y-0.5">
-              {sub.map((s) => (
-                 <button 
-                  key={s}
-                 onClick={() => cambiarVista(s.toLowerCase())}
-                 className="w-full text-left text-[12px] text-[#668EA5] hover:text-[#12263A] px-2 py-1.5 rounded-lg hover:bg-black/5 transition-colors"
-               >
-                {s}
-               </button>
-              ))}
+                <div className="pl-9 pr-2 pb-1 space-y-0.5">
+                  {sub.map((s) => {
+                    const activo = vistaActual === s.vista;
+                    return (
+                      <button
+                        key={s.vista}
+                        onClick={() => cambiarVista(s.vista)}
+                        className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg transition-colors"
+                        style={{
+                          color: activo ? "#405FFA" : "#668EA5",
+                          background: activo ? "rgba(64,95,250,0.10)" : "transparent",
+                          fontWeight: activo ? 700 : 500,
+                        }}
+                        onMouseOver={(e) => {
+                          if (!activo) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
+                        }}
+                        onMouseOut={(e) => {
+                          if (!activo) (e.currentTarget as HTMLElement).style.background = "transparent";
+                        }}
+                      >
+                        {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-             )}
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* Footer: Configuración + Salir */}
@@ -244,21 +293,25 @@ function SidebarDashboard({
 export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
-  if (vistaActual === "dashboard") {
+  // 🔧 FIX: antes solo se comparaba con "dashboard", así que al entrar a
+  // "ingresos" / "egresos" / "balance" (u otras vistas autenticadas) el
+  // sidebar caía al de visitante y parecía que habías cerrado sesión.
+  if (VISTAS_AUTENTICADAS.includes(vistaActual)) {
     return (
       <SidebarDashboard
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         cambiarVista={cambiarVista}
+        vistaActual={vistaActual}
       />
     );
   }
 
   const navLinks = [
-    { id: "casa",     label: "Casa",           Icon: Home     },
-    { id: "login",    label: "Iniciar sesión",  Icon: LogIn    },
-    { id: "registro", label: "Registrarse",     Icon: UserPlus },
-    { id: "contacto", label: "Contáctanos",     Icon: Mail     },
+    { id: "casa", label: "Casa", Icon: Home },
+    { id: "login", label: "Iniciar sesión", Icon: LogIn },
+    { id: "registro", label: "Registrarse", Icon: UserPlus },
+    { id: "contacto", label: "Contáctanos", Icon: Mail },
   ];
 
   return (
@@ -307,17 +360,16 @@ export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
                   background: active ? "#405FFA" : "transparent",
                   color: active ? "white" : "#12263A",
                 }}
-                onMouseOver={e => {
+                onMouseOver={(e) => {
                   if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
                 }}
-                onMouseOut={e => {
+                onMouseOut={(e) => {
                   if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
                 }}
               >
                 <Icon size={17} style={{ color: active ? "white" : "#668EA5", flexShrink: 0 }} />
                 {!collapsed && <span>{label}</span>}
               </button>
-              {/* Tooltip colapsado */}
               {collapsed && (
                 <span className="absolute left-[54px] top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-semibold pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-md"
                   style={{ background: "#12263A", color: "#FFFACB" }}>
@@ -331,8 +383,7 @@ export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
 
       {/* ── Ilustración sidebar ── */}
       {!collapsed ? (
-        <div className="mx-3 mb-3 rounded-2xl overflow-hidden border border-black/5 shadow-sm"
-          style={{ height: 160 }}>
+        <div className="mx-3 mb-3 rounded-2xl overflow-hidden border border-black/5 shadow-sm" style={{ height: 160 }}>
           <SidebarIllu />
         </div>
       ) : (

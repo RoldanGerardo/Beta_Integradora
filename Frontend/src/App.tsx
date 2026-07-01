@@ -14,16 +14,16 @@ export default function App() {
 
   const renderVista = () => {
     switch (vista) {
-      case "casa":      return <LandingPage onNavigate={setVista} />;
+      case "casa": return <LandingPage onNavigate={setVista} />;
       case "dashboard": return <Dashboard onNavigate={setVista} />;
-      case "registro":  return <Registro onNavigate={setVista} />;
-      case "login":     return <Login onNavigate={setVista} />;
-      
-      // 🔥 NUEVAS RUTAS SEGÚN EL SUBMENÚ DEL SIDEBAR 🔥
-      case "ingresos":  return <MovimientosManager tipoVista="ingresos" />;
-      case "egresos":   return <MovimientosManager tipoVista="egresos" />;
-      case "balance":   return <MovimientosManager tipoVista="balance" />;
-      
+      case "registro": return <Registro onNavigate={setVista} />;
+      case "login": return <Login onNavigate={setVista} />;
+
+      // 🔥 RUTAS SEGÚN EL SUBMENÚ DEL SIDEBAR 🔥
+      case "ingresos": return <MovimientosManager tipoVista="ingresos" onNavigate={setVista} />;
+      case "egresos": return <MovimientosManager tipoVista="egresos" onNavigate={setVista} />;
+      case "balance": return <MovimientosManager tipoVista="balance" onNavigate={setVista} />;
+
       default:
         return (
           <div className="flex-1 flex flex-col items-center justify-center gap-3" style={{ background: "#FFFACB", fontFamily: "'Space Grotesk',sans-serif" }}>
