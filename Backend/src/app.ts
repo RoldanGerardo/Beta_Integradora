@@ -1,10 +1,13 @@
-// Configurar Express
+//express
 import express from "express";
 import cors from "cors";
 import movimientoRoutes from "./routes/movimientoRoutes";
 import educativoRoutes from "./routes/educativoRoutes";
 import informesRoutes from "./routes/informesRoutes";
 import crudRoutes from "./routes/CRUDRoutes";
+import authRoutes from "./routes/authRoutes";
+import adminUsuariosRoutes from "./routes/adminUsuariosRoutes";
+import adminDashboardRoutes from "./routes/adminDashboardRoutes";
 
 const app = express();
 app.use(cors());
@@ -15,8 +18,12 @@ app.use("/movimientos", movimientoRoutes);
 app.use("/educativo", educativoRoutes);
 app.use("/informes", informesRoutes);
 app.use("/admin", crudRoutes);
+app.use("/auth", authRoutes);
+app.use("/admin/usuarios", adminUsuariosRoutes);
+app.use("/admin/dashboard", adminDashboardRoutes);
+
 app.get("/", (req, res) => {
-    res.json({ mensaje: "Backend Beta funcionando correctamente" });
+  res.json({ mensaje: "Backend Beta funcionando correctamente" });
 });
 
 export default app;

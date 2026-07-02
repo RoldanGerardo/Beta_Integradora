@@ -1,5 +1,4 @@
 import { Movimiento } from "../models/Movimiento";
-
 export const API_URL = "http://localhost:3000";
 
 export async function obtenerMovimientos(

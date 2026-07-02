@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import BetaLogo from "./BetaLogo";
+import { useAuth } from "../context/AuthContext";
 
 type Props = { onNavigate: (vista: string) => void };
 
 export default function Login({ onNavigate }: Props) {
-  const [form, setForm]         = useState({ email: "", password: "" });
+  const { iniciarSesion } = useAuth();
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!form.email || !form.password) {
@@ -18,10 +20,16 @@ export default function Login({ onNavigate }: Props) {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const usuario = await iniciarSesion(form.email, form.password);
+      // El acceso al panel admin depende únicamente del rol devuelto por el
+      // backend: no hay ningún botón ni ruta visible de "Administrador".
+      onNavigate(usuario.rol === "admin" ? "admin-dashboard" : "dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
+    } finally {
       setLoading(false);
-      onNavigate("dashboard");
-    }, 1200);
+    }
   };
 
   return (

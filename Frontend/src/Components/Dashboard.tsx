@@ -23,9 +23,9 @@ const movCards = [
     amount: "$2,733.00",
     change: "-8%",
     up: false,
-    bg: "#FFF3E0",
-    border: "#F8910C",
-    color: "#AE6D21",
+    bg: "#ffd4d4",
+    border: "#750a0a",
+    color: "#4b0e11",
     Icon: TrendingDown,
   },
   {
@@ -307,7 +307,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             </ul>
             <button
               className="self-start text-[11px] font-bold px-3 py-1 rounded-full transition-colors mt-1"
-              style={{ background: "#12263A", color: "#FFFACB" }}
+              style={{ background: "#12263A", color: "#fffacb" }}
             >
               Continuar →
             </button>
