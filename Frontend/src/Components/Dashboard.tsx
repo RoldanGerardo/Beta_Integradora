@@ -1,5 +1,7 @@
-import { Mail, HelpCircle, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, CheckCircle, Circle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, HelpCircle, TrendingUp, TrendingDown, ArrowUpRight, BookOpen, CheckCircle, Circle, Wallet, Loader2 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
+import { obtenerMovimientos } from "../services/api";
 
 type DashboardProps = {
   onNavigate?: (vista: string) => void;
@@ -39,14 +41,48 @@ const movCards = [
 ];
 
 const quizzes = [
-  { done: true,  label: "1. Salud Financiera Básica" },
-  { done: true,  label: "2. ¿Qué tanto sabes del Ahorro?" },
+  { done: true, label: "1. Salud Financiera Básica" },
+  { done: true, label: "2. ¿Qué tanto sabes del Ahorro?" },
   { done: false, label: "3. Cuestionario Semanal: Presupuestos" },
   { done: false, label: "4. Mitos del Crédito Joven" },
 ];
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
   const savingPct = 46;
+
+  const [cargandoBalance, setCargandoBalance] = useState(true);
+  const [balanceTotal, setBalanceTotal] = useState<number | null>(null);
+  const [errorBalance, setErrorBalance] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    setCargandoBalance(true);
+    setErrorBalance(false);
+
+    obtenerMovimientos()
+      .then((movs) => {
+        if (!activo) return;
+        const totalIngresos = movs
+          .filter((m) => m.tipo === "ingreso")
+          .reduce((acc, m) => acc + Number(m.monto), 0);
+        const totalEgresos = movs
+          .filter((m) => m.tipo === "egreso")
+          .reduce((acc, m) => acc + Number(m.monto), 0);
+        setBalanceTotal(totalIngresos - totalEgresos);
+      })
+      .catch(() => {
+        if (activo) setErrorBalance(true);
+      })
+      .finally(() => {
+        if (activo) setCargandoBalance(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
+
+  const balancePositivo = (balanceTotal ?? 0) >= 0;
 
   return (
     <div
@@ -81,19 +117,16 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       </header>
 
       <div className="flex-1 px-8 py-6 flex flex-col gap-5 overflow-y-auto max-w-5xl w-full mx-auto">
-
         <div
           className="rounded-2xl p-5 flex items-center gap-5 relative overflow-hidden"
           style={{ background: "#BDE2F2", border: "1px solid rgba(102,142,165,0.25)" }}
         >
-          {/* Avatar placeholder */}
           <div
             className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-xl shadow-sm z-10"
             style={{ background: "#405FFA" }}
           >
             U
           </div>
-
           <div className="flex-1 z-10">
             <div className="flex justify-between items-center mb-2">
               <div>
@@ -104,37 +137,27 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                   $467.00 <span className="text-[13px] font-normal text-[#668EA5]">/ $1,000.00</span>
                 </div>
               </div>
-              <div
-                className="text-[22px] font-bold"
-                style={{ color: "#405FFA" }}
-              >
+              <div className="text-[22px] font-bold" style={{ color: "#405FFA" }}>
                 {savingPct}%
               </div>
             </div>
-            <div
-              className="w-full rounded-full h-3 overflow-hidden"
-              style={{ background: "rgba(255,255,255,0.6)" }}
-            >
+            <div className="w-full rounded-full h-3 overflow-hidden" style={{ background: "rgba(255,255,255,0.6)" }}>
               <div
                 className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width: `${savingPct}%`,
-                  background: "linear-gradient(90deg, #405FFA, #26CBD1)",
-                }}
+                style={{ width: `${savingPct}%`, background: "linear-gradient(90deg, #405FFA, #26CBD1)" }}
               />
             </div>
             <div className="text-[11px] mt-1.5" style={{ color: "#668EA5" }}>
               ¡Vas muy bien! Faltan <strong style={{ color: "#12263A" }}>$533.00</strong> para tu meta 🎯
             </div>
           </div>
-
           <div
             className="absolute right-[-30px] top-[-30px] w-36 h-36 rounded-full pointer-events-none"
             style={{ background: "#405FFA", opacity: 0.07 }}
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {movCards.map(({ label, amount, change, up, bg, border, color, Icon }) => (
             <div
               key={label}
@@ -162,10 +185,50 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               <div className="text-[11px] font-medium" style={{ color }}>{label}</div>
             </div>
           ))}
+
+          {/* Card de balance total, conectada al backend */}
+          <div
+            className="rounded-2xl p-4 flex flex-col gap-2 cursor-pointer transition-transform duration-150 hover:-translate-y-1"
+            style={{
+              background: errorBalance ? "#FEE2E2" : "#fafdff",
+              border: `1px solid ${errorBalance ? "#F8717130" : "#405FFA30"}`,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: errorBalance ? "#F8717122" : "#405FFA22" }}
+              >
+                <Wallet size={18} style={{ color: errorBalance ? "#B91C1C" : "#405FFA" }} />
+              </div>
+              {!cargandoBalance && !errorBalance && (
+                <span
+                  className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                  style={{
+                    background: balancePositivo ? "rgba(132,209,117,0.25)" : "rgba(248,145,12,0.20)",
+                    color: balancePositivo ? "#707D4E" : "#AE6D21",
+                  }}
+                >
+                  {balancePositivo ? "positivo" : "negativo"}
+                </span>
+              )}
+            </div>
+            <div className="text-[20px] font-bold flex items-center gap-2" style={{ color: "#12263A" }}>
+              {cargandoBalance ? (
+                <Loader2 size={18} className="animate-spin" style={{ color: "#405FFA" }} />
+              ) : errorBalance ? (
+                "—"
+              ) : (
+                `$${(balanceTotal ?? 0).toFixed(2)}`
+              )}
+            </div>
+            <div className="text-[11px] font-medium" style={{ color: errorBalance ? "#B91C1C" : "#405FFA" }}>
+              {errorBalance ? "No se pudo cargar el balance" : "Balance total actual"}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-
           <div
             className="rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden"
             style={{ background: "#E6FBDA", border: "1px solid rgba(132,209,117,0.30)" }}
@@ -263,15 +326,11 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             Actualizado hoy
           </div>
         </div>
-
       </div>
 
       <footer
         className="flex items-center justify-between px-8 py-3 flex-shrink-0"
-        style={{
-          background: "#BDE2F2",
-          borderTop: "1px solid rgba(18,38,58,0.08)",
-        }}
+        style={{ background: "#BDE2F2", borderTop: "1px solid rgba(18,38,58,0.08)" }}
       >
         <button
           className="flex items-center gap-2 text-[12px] font-bold transition-colors"
@@ -282,14 +341,12 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <Mail size={14} />
           beta@example.com
         </button>
-
         <div className="flex flex-col items-center">
           <BetaLogo size={22} />
           <span className="text-[10px] font-bold mt-0.5" style={{ color: "#405FFA" }}>
             BETA: Finanzas para los Jóvenes
           </span>
         </div>
-
         <button
           className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
           style={{ border: "2px solid rgba(18,38,58,0.18)", color: "#668EA5" }}
