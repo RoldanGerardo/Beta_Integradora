@@ -5,6 +5,7 @@ import Dashboard from "./Components/Dashboard";
 import Registro from "./Components/Registro";
 import Login from "./Components/Login";
 import MovimientosManager from "./Components/MovimientosManager";
+import Reportes from "./Components/Reportes";
 
 export default function App() {
   const [vista, setVista] = useState<string>("casa");
@@ -19,6 +20,9 @@ export default function App() {
       case "ingresos": return <MovimientosManager tipoVista="ingresos" onNavigate={setVista} />;
       case "egresos": return <MovimientosManager tipoVista="egresos" onNavigate={setVista} />;
       case "balance": return <MovimientosManager tipoVista="balance" onNavigate={setVista} />;
+      case "reportes": return <Reportes onNavigate={setVista} />;
+      case "quincenales": return <Reportes onNavigate={setVista} filtroInicial="quincenal" />;
+      case "mensuales": return <Reportes onNavigate={setVista} filtroInicial="mensual" />;
 
       default:
         return (

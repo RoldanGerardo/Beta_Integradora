@@ -1,21 +1,20 @@
 import { Router } from "express";
-import MovimientoManager from "../services/movimientosManager";
+import { movimientoManager } from "../services/movimientosManager";
 
 const router = Router();
-const manager = new MovimientoManager();
 
-// get para tener el informe dependiento del rfago de la gecha
+// get para tener el informe dependiendo del rango de fecha
 router.get("/", (req, res) => {
-    // Tomamos las fechas que el frontend envie en la URL
-    const fechaInicio = req.query.inicio as string;
-    const fechaFin = req.query.fin as string;
+  // Tomamos las fechas que el frontend envíe en la URL
+  const fechaInicio = req.query.inicio as string;
+  const fechaFin = req.query.fin as string;
 
-    if (!fechaInicio || !fechaFin) {
-        return res.status(400).json({ error: "Debes enviar fecha de inicio y fin" });
-    }
+  if (!fechaInicio || !fechaFin) {
+    return res.status(400).json({ error: "Debes enviar fecha de inicio y fin" });
+  }
 
-    const resumen = manager.obtenerResumen(fechaInicio, fechaFin);
-    res.json(resumen);
+  const resumen = movimientoManager.obtenerResumen(fechaInicio, fechaFin);
+  res.json(resumen);
 });
 
 export default router;

@@ -32,3 +32,21 @@ export async function eliminarMovimiento(id: number): Promise<void> {
   });
   if (!response.ok) throw new Error("No se pudo eliminar el movimiento");
 }
+
+export interface InformePeriodo {
+  ingresosTotales: number;
+  egresosTotales: number;
+  diferencia: number;
+  movimientosDelPeriodo: Movimiento[];
+}
+
+export async function obtenerInforme(
+  inicio: string,
+  fin: string
+): Promise<InformePeriodo> {
+  const response = await fetch(
+    `${API_URL}/informes?inicio=${inicio}&fin=${fin}`
+  );
+  if (!response.ok) throw new Error("No se pudo obtener el informe");
+  return response.json();
+}
