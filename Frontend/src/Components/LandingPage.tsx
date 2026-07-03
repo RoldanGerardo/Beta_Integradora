@@ -139,21 +139,21 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
           style={{ background: "rgba(250,190,11,0.15)", border: "1px solid rgba(250,190,11,0.35)" }}
         >
           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#FABE0B" }} />
-          <span className="text-[10px] font-semibold tracking-[.08em] uppercase" style={{ color: "#AE6D21" }}>
+          <span className="text-[20px] font-semibold tracking-[.08em] uppercase" style={{ color: "#AE6D21" }}>
             Tu dinero, tu futuro
           </span>
         </div>
 
         <h1
           className="font-['Space_Grotesk'] font-bold leading-[1.18] mb-2.5"
-          style={{ fontSize: "clamp(24px,4vw,32px)", color: "#12263A", maxWidth: 390 }}
+          style={{ fontSize: "clamp(25px,4vw,32px)", color: "#12263A", maxWidth: 390 }}
         >
           Maneja tu dinero{" "}
           <em className="not-italic" style={{ color: "#26CBD1" }}>sin miedo</em>
         </h1>
         <p
-          className="text-[13px] leading-[1.72] mb-5"
-          style={{ color: "#668EA5", maxWidth: 310 }}
+          className="text-[14px] leading-[1.72] mb-5"
+          style={{ color: "#3f6b84", maxWidth: 310 }}
         >
           Registra ingresos, controla gastos y aprende finanzas con lecciones hechas para ti.
         </p>
@@ -192,7 +192,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
               b.style.color = "#668EA5";
             }}
           >
-            Explorar →
+            Explorar... →
           </button>
         </div>
       </section>
@@ -204,16 +204,16 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         style={{ gridTemplateColumns: "1fr 1fr", background: "#FFFACB" }}
       >
         <div>
-          <p className="text-[10px] font-semibold tracking-[.10em] uppercase mb-2" style={{ color: "#AE6D21" }}>
+          <p className="text-[20px] font-semibold tracking-[.10em] uppercase mb-2" style={{ color: "#AE6D21" }}>
             Quiénes somos
           </p>
           <h2
-            className="font-['Space_Grotesk'] font-bold text-[20px] mb-2 leading-snug"
+            className="font-['Space_Grotesk'] font-bold text-[22px] mb-2 leading-snug"
             style={{ color: "#12263A" }}
           >
             Educación financiera accesible
           </h2>
-          <p className="text-[13px] leading-[1.72] mb-4" style={{ color: "#668EA5" }}>
+          <p className="text-[14px] leading-[1.72] mb-4" style={{ color: "#557c98" }}>
             Somos estudiantes de la UT Cancún que creen que aprender a administrar el dinero
             no debe ser difícil. BETA nació para demostrarlo.
           </p>
@@ -246,8 +246,8 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
       <div style={{ height: 1, margin: "0 40px", background: "rgba(18,38,58,0.08)" }} />
 
-      <section className="px-10 py-8" style={{ background: "#F4EDEA" }}>
-        <p className="text-[10px] font-semibold tracking-[.10em] uppercase mb-2" style={{ color: "#AE6D21" }}>
+      <section className="px-10 py-8" style={{ background: "#f7dea3" }}>
+        <p className="text-[20px] font-semibold tracking-[.10em] uppercase mb-2" style={{ color: "#AE6D21" }}>
           Qué ofrecemos
         </p>
         <h2 className="font-['Space_Grotesk'] font-bold text-[20px] mb-6 leading-snug" style={{ color: "#12263A" }}>
@@ -289,7 +289,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                 >
                   {title}
                 </div>
-                <p className="text-[11px] text-center leading-[1.65]" style={{ color: "#668EA5" }}>
+                <p className="text-[12px] text-center leading-[1.65]" style={{ color: "#716f64" }}>
                   {desc}
                 </p>
               </div>
@@ -300,7 +300,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
 
       <section
         className="px-10 py-6 flex items-center gap-5 flex-wrap"
-        style={{ background: "#BDE2F2", borderTop: "1px solid rgba(102,142,165,0.22)" }}
+        style={{ background: "#BDE2F2", borderTop: "1px solid rgba(51, 89, 111, 0.22)" }}
       >
         <div
           className="w-[58px] h-[58px] rounded-full flex items-center justify-center flex-shrink-0"

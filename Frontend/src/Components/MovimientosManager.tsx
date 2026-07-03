@@ -148,19 +148,6 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
     }
   };
 
-  if (tipoVista === "balance") {
-    return (
-      <div className="flex-1 min-h-screen flex items-center justify-center" style={{ background: "#FFFACB" }}>
-        <div className="text-center animate-[fadeInUp_.5s_ease-out]">
-          <span className="text-4xl">🚧</span>
-          <h2 className="text-xl font-bold mt-3 tracking-tight" style={{ color: "#12263A", fontFamily: "'Space Grotesk',sans-serif" }}>
-            Vista de Balance Global en construcción
-          </h2>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 min-h-screen flex flex-col" style={{ background: "#FFFACB", fontFamily: "'Space Grotesk',sans-serif" }}>
       <style>{`
@@ -204,7 +191,7 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           </div>
           <div className="flex-1 z-10">
             <div className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: tema.text }}>
-              {isIngreso ? "Saldo disponible" : "Total de egresos"}
+              {isIngreso ? "Ingresos totales " : "Total de egresos"}
             </div>
             <div className="text-[28px] font-bold tabular-nums tracking-tight" style={{ color: "#12263A" }}>
               {cargando ? (

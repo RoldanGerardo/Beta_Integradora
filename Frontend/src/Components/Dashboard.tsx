@@ -94,10 +94,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         style={{ background: "#F4EDEA", borderBottom: "1px solid rgba(18,38,58,0.07)" }}
       >
         <div
-          className="px-5 py-1.5 rounded-full text-[13px] font-bold"
-          style={{ background: "#FABE0B", color: "#12263A" }}
+          className="px-20 py-1.5 rounded-full text-[15px] font-bold"
+          style={{ background: "#ffd34f", color: "#12263A" }}
         >
-          ¡Bienvenido de nuevo, <span style={{ color: "#AE6D21" }}>usuario_67</span>! 👋
+          ¡BIENVENIDO DE NUEVO, <span style={{ color: "#5b3000" }}>usuario_67</span>! 
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -223,7 +223,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               )}
             </div>
             <div className="text-[11px] font-medium" style={{ color: errorBalance ? "#B91C1C" : "#405FFA" }}>
-              {errorBalance ? "No se pudo cargar el balance" : "Balance total actual"}
+              {errorBalance ? "No se pudo cargar con el saldo" : "Saldo actual"}
             </div>
           </div>
         </div>
@@ -231,16 +231,16 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         <div className="grid grid-cols-2 gap-4">
           <div
             className="rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden"
-            style={{ background: "#E6FBDA", border: "1px solid rgba(132,209,117,0.30)" }}
+            style={{ background: "#b4cfdd", border: "1px solid rgba(117, 135, 209, 0.59)" }}
           >
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-[16px]"
-                style={{ background: "#84D17522" }}
+                style={{ background: "#53899e57" }}
               >
                 💡
               </div>
-              <div className="text-[12px] font-bold uppercase tracking-wider" style={{ color: "#707D4E" }}>
+              <div className="text-[12px] font-bold uppercase tracking-wider" style={{ color: "#4e5a7d" }}>
                 Consejo del día
               </div>
             </div>
@@ -254,21 +254,21 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             </p>
             <button
               className="self-start text-[11px] font-bold px-3 py-1 rounded-full transition-colors"
-              style={{ background: "#84D175", color: "white" }}
+              style={{ background: "#759ed1", color: "white" }}
             >
               Más consejos →
             </button>
             <div
               className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full pointer-events-none"
-              style={{ background: "#84D175", opacity: 0.10 }}
+              style={{ background: "#757ad1", opacity: 0.10 }}
             />
           </div>
 
           <div
             className="rounded-2xl p-5 flex flex-col gap-3"
             style={{
-              background: "linear-gradient(145deg, #BDE2F2 0%, #668EA5 100%)",
-              border: "1px solid rgba(102,142,165,0.25)",
+              background: "linear-gradient(145deg, #bdf2f1 0%, #ade3e2 100%)",
+              border: "1px solid rgba(72, 125, 156, 0.25)",
             }}
           >
             <div className="flex items-center gap-2">
@@ -278,7 +278,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <span
                 className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(18,38,58,0.12)", color: "#12263A" }}
+                style={{ background: "rgba(192, 192, 192, 0.12)", color: "#12263A" }}
               >
                 2/4
               </span>
@@ -288,7 +288,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 <li key={label} className="flex items-center gap-2">
                   {done
                     ? <CheckCircle size={14} style={{ color: "#12263A", flexShrink: 0 }} />
-                    : <Circle size={14} style={{ color: "rgba(255,255,255,0.60)", flexShrink: 0 }} />
+                    : <Circle size={14} style={{ color: "rgba(217, 217, 217, 0.6)", flexShrink: 0 }} />
                   }
                   <span
                     className="text-[12px]"

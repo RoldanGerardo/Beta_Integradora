@@ -15,7 +15,6 @@ const VISTAS_AUTENTICADAS = [
   "dashboard",
   "ingresos",
   "egresos",
-  "balance",
   "cuestionarios",
   "articulos",
   "quincenales",
@@ -98,7 +97,6 @@ function SidebarDashboard({
       sub: [
         { label: "Ingresos", vista: "ingresos" },
         { label: "Egresos", vista: "egresos" },
-        { label: "Balance", vista: "balance" },
       ],
     },
     {
