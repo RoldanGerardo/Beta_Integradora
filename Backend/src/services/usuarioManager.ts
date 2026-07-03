@@ -7,9 +7,8 @@ export default class UsuarioManager {
 
   constructor() {
     // Cuenta admin sembrada para que puedas entrar de inmediato.
-    // ⚠️ Cambia esta contraseña antes de mostrar el proyecto / subirlo.
     this.agregarUsuario("Administrador BETA", "admin", "admin@beta.mx", "Admin123!", "admin");
-    this.agregarUsuario("Usuario Demo", "usuario_67", "demo@beta.mx", "Demo123!", "usuario");
+    this.agregarUsuario("Usuario Demo", "usuario_67", "demo@beta.mx", "contraseña", "usuario");
   }
 
   agregarUsuario(nombre: string, username: string, email: string, password: string, rol: RolUsuario = "usuario"): Usuario {
