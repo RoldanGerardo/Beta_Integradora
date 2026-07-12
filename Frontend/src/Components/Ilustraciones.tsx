@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, ElementType } from "react";
 import { C } from "./theme.ts";
 
 /* ════════════════════════════════════════════════════════════
@@ -193,5 +193,95 @@ export function PatternDots({ color = "#12263A", opacity = 0.5, size = 16 }: Pat
       className="absolute inset-0 pointer-events-none"
       style={{ backgroundImage: `radial-gradient(${color} 1.4px, transparent 1.4px)`, backgroundSize: `${size}px ${size}px`, opacity }}
     />
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   Piezas nuevas, añadidas para la reconstrucción visual del
+   Dashboard de usuario. No reemplazan nada de lo anterior.
+   ════════════════════════════════════════════════════════════ */
+
+type BetoCoinHeroProps = {
+  size?: number;
+};
+
+/* Beto "de cuerpo entero" asomándose desde abajo — pensado para
+   vivir sentado sobre el anillo de progreso de la tarjeta hero
+   del Dashboard, como si celebrara la meta de ahorro. */
+export function BetoCoinHero({ size = 92 }: BetoCoinHeroProps) {
+  return (
+    <svg viewBox="0 0 140 130" width={size} height={size * (130 / 140)} style={{ animation: "coinFloat 3.4s ease-in-out infinite" }}>
+      <defs>
+        <radialGradient id="coinHeroGrad" cx="35%" cy="28%" r="78%">
+          <stop offset="0%" stopColor="#FFE985" />
+          <stop offset="55%" stopColor={C.sun} />
+          <stop offset="100%" stopColor={C.sunDeep} />
+        </radialGradient>
+      </defs>
+      <ellipse cx="70" cy="118" rx="40" ry="8" fill={C.navy} opacity=".1" />
+      <circle cx="70" cy="62" r="52" fill="url(#coinHeroGrad)" stroke={C.navy} strokeWidth="4" />
+      <circle cx="70" cy="62" r="42" fill="none" stroke="#FFF3C4" strokeWidth="2.5" strokeDasharray="4 6" opacity=".65" />
+      <circle cx="48" cy="72" r="6.5" fill={C.mandarin} opacity=".45" />
+      <circle cx="92" cy="72" r="6.5" fill={C.mandarin} opacity=".45" />
+      <circle cx="54" cy="60" r="5.2" fill={C.navy} />
+      <circle cx="86" cy="60" r="5.2" fill={C.navy} />
+      <circle cx="56" cy="58" r="1.5" fill="white" />
+      <circle cx="88" cy="58" r="1.5" fill="white" />
+      <path d="M54 76 Q70 88 86 76" stroke={C.navy} strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="52" cy="38" rx="10" ry="6" fill="white" opacity=".5" transform="rotate(-25 52 38)" />
+      <g style={{ transformOrigin: "104px 52px", animation: "wave 1.6s ease-in-out infinite" }}>
+        <ellipse cx="106" cy="44" rx="8" ry="13" fill={C.sun} stroke={C.navy} strokeWidth="2.5" transform="rotate(20 106 44)" />
+      </g>
+    </svg>
+  );
+}
+
+/* Monedas flotando en el fondo del Dashboard — capa decorativa de
+   profundidad, sutil, siempre detrás del contenido (pointer-events: none). */
+export function FloatingCoins() {
+  const coins = [
+    { top: "6%", left: "3%", size: 22, color: C.sun, delay: "0s", dur: "7s" },
+    { top: "18%", left: "92%", size: 16, color: C.turquoise, delay: "0.6s", dur: "8.5s" },
+    { top: "68%", left: "1%", size: 18, color: C.mandarin, delay: "1.1s", dur: "6.5s" },
+    { top: "82%", left: "95%", size: 26, color: C.blue, delay: "0.3s", dur: "9s" },
+    { top: "42%", left: "97%", size: 12, color: C.moss, delay: "1.6s", dur: "7.5s" },
+  ];
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      {coins.map((c, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            top: c.top,
+            left: c.left,
+            width: c.size,
+            height: c.size,
+            background: `radial-gradient(circle at 35% 30%, ${c.color}55, ${c.color}22 60%, transparent 70%)`,
+            border: `2px solid ${c.color}33`,
+            animation: `coinDrift ${c.dur} ease-in-out ${c.delay} infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+type CoinNodeProps = {
+  Icon: ElementType;
+  color: string;
+  bg: string;
+};
+
+/* Nodo circular tipo "moneda" usado en la línea de tiempo de
+   movimientos recientes del Dashboard. */
+export function CoinNode({ Icon, color, bg }: CoinNodeProps) {
+  return (
+    <div
+      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 relative z-10"
+      style={{ background: bg, borderColor: color, boxShadow: `0 2px 0 ${color}55` }}
+    >
+      <Icon size={17} color={color} />
+    </div>
   );
 }
