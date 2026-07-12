@@ -20,7 +20,7 @@ router.get("/", (req: Request, res: Response) => {
   let resultado = movimientoManager.obtenerMovimientos();
   if (tipo === "ingreso" || tipo === "egreso") {
     resultado = movimientoManager.obtenerMovimientosPorTipo(tipo);
-  }
+  } 
   res.status(200).json(resultado.map(mapMovimiento));
 });
 

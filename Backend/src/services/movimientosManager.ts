@@ -29,7 +29,7 @@ export default class MovimientoManager {
     const filtrados = this.movimientos.filter(
       (mov) => mov.getFecha() >= fechaInicio && mov.getFecha() <= fechaFin
     );
-
+//dar de alta
     let totalIngresos = 0;
     let totalEgresos = 0;
 
