@@ -9,9 +9,9 @@ type Props = {
 
 export default function AdminLayout({ vistaActual, cambiarVista, children }: Props) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen" style={{ background: "#F4F7FB" }}>
       <AdminSidebar vistaActual={vistaActual} cambiarVista={cambiarVista} />
-      {children}
+      <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
 }

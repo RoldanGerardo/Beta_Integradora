@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
-  Home, Mail, ChevronLeft, LogIn, UserPlus,
-  Settings, PieChart, Info,
-  BookOpen, Activity, Bell, LogOut,
+  Home, Mail, LogIn, UserPlus, Settings, PieChart, Info,
+  BookOpen, Activity, Bell, LogOut, Sparkles,
 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
+import { useAuth } from "../context/AuthContext";
+import { C } from "./theme.ts";
 
 type SidebarProps = {
   vistaActual: string;
   cambiarVista: (vista: string) => void;
 };
+
+const RAIL = 78;
+const PANEL = 264;
 
 const VISTAS_AUTENTICADAS = [
   "dashboard",
@@ -22,218 +27,146 @@ const VISTAS_AUTENTICADAS = [
   "reportes",
 ];
 
-function SidebarIllu() {
+/* Envoltorio común de la barra lateral: header con logo + espacio para
+   contenido + pie fijo (usado tanto para el menú público como el de usuario) */
+type ShellProps = {
+  expanded: boolean;
+  setExpanded: (v: boolean) => void;
+  children: ReactNode;
+  footer?: ReactNode;
+};
+
+function Shell({ expanded, setExpanded, children, footer }: ShellProps) {
   return (
-    <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full" aria-hidden="true">
-      <rect width="200" height="160" fill="#F4EDEA" />
-      <rect width="200" height="80" fill="#BDE2F2" opacity=".20" />
-      <circle cx="168" cy="28" r="18" fill="#FABE0B" opacity=".22" />
-      <circle cx="168" cy="28" r="11" fill="#FABE0B" opacity=".40" />
-      <ellipse cx="42" cy="24" rx="18" ry="8" fill="white" opacity=".60" />
-      <ellipse cx="56" cy="20" rx="13" ry="7" fill="white" opacity=".50" />
-      <ellipse cx="118" cy="18" rx="14" ry="6" fill="white" opacity=".40" />
-      {[
-        { x: 22, h: 44, y: 90, c: "#BDE2F2" },
-        { x: 44, h: 56, y: 78, c: "#FABE0B" },
-        { x: 66, h: 68, y: 66, c: "#26CBD1" },
-        { x: 88, h: 50, y: 84, c: "#84D175" },
-        { x: 110, h: 74, y: 60, c: "#F8910C" },
-        { x: 132, h: 60, y: 74, c: "#668EA5" },
-        { x: 154, h: 46, y: 88, c: "#FABE0B" },
-      ].map((b) => (
-        <rect key={b.x} x={b.x} y={b.y} width="16" height={b.h} rx="4" fill={b.c} />
-      ))}
-      <line x1="16" y1="136" x2="178" y2="136" stroke="#12263A" strokeWidth="1" opacity=".08" />
-      <polyline
-        points="30,110 52,90 74,76 96,96 118,66 140,82 162,100"
-        fill="none" stroke="#F8910C" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round" opacity=".70" />
-      {[[30, 110], [52, 90], [74, 76], [96, 96], [118, 66], [140, 82]].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="3" fill="#F8910C" />
-      ))}
-      <g transform="translate(80,38) rotate(-10)">
-        <path d="M0 0 C-7 -4 -13 -2 -15 2 C-11 0 -8 1 -6 3 Z" fill="#405FFA" />
-        <path d="M0 0 C-5 -2 -8 0 -6 3 Z" fill="#6B83FB" opacity=".7" />
-        <circle cx="2.5" cy="-1" r="3" fill="#405FFA" />
-        <path d="M4 -1.5 L7.5 -0.5 L4 0.5Z" fill="#12263A" />
-      </g>
-      <circle cx="52" cy="44" r="6" fill="#FABE0B" opacity=".75" />
-      <text x="52" y="48" textAnchor="middle" fontSize="7" fontWeight="700" fill="#AE6D21">$</text>
-      <circle cx="140" cy="36" r="5" fill="#84D175" opacity=".70" />
-      <text x="140" y="40" textAnchor="middle" fontSize="6" fontWeight="700" fill="#707D4E">$</text>
-      <text x="100" y="150" textAnchor="middle"
-        fontFamily="Space Grotesk,sans-serif" fontSize="8"
-        fontWeight="600" fill="#12263A" opacity=".35">
-        balance mensual
-      </text>
-    </svg>
+    <>
+      <div className="flex-shrink-0 h-screen" style={{ width: RAIL }} />
+      <aside
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+        className="fixed left-0 top-0 h-screen flex flex-col transition-[width] duration-300 ease-out"
+        style={{ width: expanded ? PANEL : RAIL, background: "#132A40", borderRight: "1px solid rgba(255,255,255,0.06)", zIndex: 40, boxShadow: expanded ? "8px 0 30px rgba(0,0,0,0.25)" : "none", fontFamily: "'Inter',sans-serif", overflow: "hidden" }}
+      >
+        <div className="flex items-center gap-2.5 px-4 py-4 flex-shrink-0" style={{ minHeight: 68 }}>
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: C.sun }}>
+            <BetaLogo size={22} />
+          </div>
+          <div className="overflow-hidden whitespace-nowrap font-['Space_Grotesk'] font-extrabold text-[14px] text-white leading-tight" style={{ opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>
+            BETA<div className="text-[10px] font-medium" style={{ color: "#7C93A6" }}>Finanzas para jóvenes</div>
+          </div>
+        </div>
+        {children}
+        {footer && <div className="p-3 flex-shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>{footer}</div>}
+      </aside>
+    </>
   );
 }
 
-function MiniIllu() {
+type NavButtonProps = {
+  active: boolean;
+  Icon: LucideIcon;
+  label: string;
+  color: string;
+  expanded: boolean;
+  onClick: () => void;
+  hasChevron?: boolean;
+  chevronOpen?: boolean;
+};
+
+function NavButton({ active, Icon, label, color, expanded, onClick, hasChevron, chevronOpen }: NavButtonProps) {
   return (
-    <div className="flex flex-col items-center gap-1 py-3">
-      {["#FABE0B", "#26CBD1", "#84D175", "#F8910C"].map((c, i) => (
-        <div key={i} className="w-7 rounded-full"
-          style={{ height: 6 + i * 3, background: c, opacity: .75 }} />
-      ))}
-    </div>
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[13px] font-bold transition-all duration-150 whitespace-nowrap"
+      style={{ background: active ? `${color}22` : "transparent", color: active ? color : "#C7D4DE" }}
+      onMouseOver={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+      onMouseOut={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+    >
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-200" style={{ background: active ? color : "rgba(255,255,255,0.06)", transform: active ? "scale(1.05)" : "none" }}>
+        <Icon size={17} color={active ? "#12263A" : color} strokeWidth={2.3} />
+      </div>
+      <span className="flex-1 text-left overflow-hidden" style={{ opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>{label}</span>
+      {hasChevron && expanded && <span className="text-[10px]" style={{ color: "#7C93A6", transform: chevronOpen ? "rotate(90deg)" : "none", transition: "transform .2s" }}>▸</span>}
+    </button>
   );
 }
 
-function SidebarDashboard({
-  collapsed, setCollapsed, cambiarVista, vistaActual,
-}: {
-  collapsed: boolean;
-  setCollapsed: (v: boolean) => void;
-  cambiarVista: (v: string) => void;
+type SidebarVariantProps = {
+  expanded: boolean;
+  setExpanded: (v: boolean) => void;
+  cambiarVista: (vista: string) => void;
   vistaActual: string;
-}) {
-  const menuItems = [
-    { label: "Inicio", Icon: Home, color: "#405FFA", vista: "dashboard", sub: [] as { label: string; vista: string }[] },
-    {
-      label: "Movimientos", Icon: Activity, color: "#84D175", vista: "",
-      sub: [
-        { label: "Ingresos", vista: "ingresos" },
-        { label: "Egresos", vista: "egresos" },
-      ],
-    },
-    {
-      label: "Módulo educativo", Icon: BookOpen, color: "#FABE0B", vista: "",
-      sub: [
-        { label: "Cuestionarios", vista: "cuestionarios" },
-        { label: "Artículos", vista: "articulos" },
-      ],
-    },
-    {
-      label: "Reportes", Icon: PieChart, color: "#F8910C", vista: "",
-      sub: [
-        { label: "Quincenales", vista: "quincenales" },
-        { label: "Mensuales", vista: "mensuales" },
-      ],
-    },
-    { label: "Contáctanos", Icon: Mail, color: "#668EA5", vista: "contacto", sub: [] },
-    { label: "Acerca de", Icon: Info, color: "#668EA5", vista: "acerca", sub: [] },
-  ];
+};
 
+function SidebarUsuario({ expanded, setExpanded, cambiarVista, vistaActual }: SidebarVariantProps) {
+  const menuItems = [
+    { label: "Inicio", Icon: Home, color: C.blue, vista: "dashboard", sub: [] as { label: string; vista: string }[] },
+    { label: "Movimientos", Icon: Activity, color: C.moss, vista: "", sub: [{ label: "💰 Ingresos", vista: "ingresos" }, { label: "🛍️ Egresos", vista: "egresos" }] },
+    { label: "Módulo educativo", Icon: BookOpen, color: C.sun, vista: "", sub: [{ label: "Cuestionarios", vista: "cuestionarios" }, { label: "Artículos", vista: "articulos" }] },
+    { label: "Reportes", Icon: PieChart, color: C.mandarin, vista: "", sub: [{ label: "Quincenales", vista: "quincenales" }, { label: "Mensuales", vista: "mensuales" }] },
+    { label: "Contáctanos", Icon: Mail, color: C.turquoise, vista: "contacto", sub: [] },
+    { label: "Acerca de", Icon: Info, color: C.turquoise, vista: "acerca", sub: [] },
+  ];
   const menuActivo = menuItems.find((m) => m.sub.some((s) => s.vista === vistaActual))?.label ?? null;
   const [openMenu, setOpenMenu] = useState<string | null>(menuActivo);
+  const { cerrarSesion } = useAuth();
 
   return (
-    <aside
-      className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out h-screen relative"
-      style={{
-        width: collapsed ? "66px" : "240px",
-        background: "#F4EDEA",
-        borderRight: "1px solid rgba(18,38,58,0.08)",
-        fontFamily: "'Inter',sans-serif",
-      }}
-    >
-      <div className="flex items-center justify-between p-3.5 min-h-[60px]">
-        {!collapsed && (
-          <div className="flex items-center gap-2 overflow-hidden">
-            <BetaLogo size={30} />
-            <div className="font-['Space_Grotesk'] text-[13px] font-bold text-[#12263A] leading-tight whitespace-nowrap">
-              BETA
-              <div className="text-[10px] font-normal text-[#668EA5]">Finanzas para jóvenes</div>
-            </div>
-          </div>
-        )}
-        {collapsed && <BetaLogo size={28} />}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg hover:bg-black/5 text-[#668EA5] flex-shrink-0 transition-colors"
-        >
-          <ChevronLeft
-            size={15}
-            style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform .3s" }}
-          />
-        </button>
-      </div>
-
-      {!collapsed ? (
-        <div className="mx-3 mb-3 p-3 rounded-2xl bg-white/60 border border-black/5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#405FFA] flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
-            U
-          </div>
-          <div className="overflow-hidden">
-            <div className="text-[12px] font-bold text-[#12263A] truncate">usuario_67</div>
-            <div className="text-[10px] text-[#668EA5]">Cuenta activa</div>
-          </div>
-          <button className="ml-auto text-[#668EA5] hover:text-[#F8910C] transition-colors flex-shrink-0">
-            <Bell size={15} />
+    <Shell
+      expanded={expanded}
+      setExpanded={setExpanded}
+      footer={
+        <>
+          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[12px] font-semibold text-[#C7D4DE] hover:bg-white/5 transition-colors whitespace-nowrap">
+            <Settings size={15} /><span style={{ opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>Configuración</span>
           </button>
-        </div>
-      ) : (
-        <div className="flex justify-center mb-3">
-          <div className="w-9 h-9 rounded-full bg-[#405FFA] flex items-center justify-center text-white font-bold text-sm">
-            U
+          <button
+            onClick={() => { cerrarSesion(); cambiarVista("casa"); }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[12px] font-bold whitespace-nowrap transition-colors"
+            style={{ color: C.mandarin }}
+            onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(248,145,12,0.10)")}
+            onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+          >
+            <LogOut size={15} /><span style={{ opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>Cerrar sesión</span>
+          </button>
+        </>
+      }
+    >
+      {expanded && (
+        <div className="mx-3 mb-3 p-3 rounded-2xl flex items-center gap-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-white text-sm" style={{ background: C.blue }}>U</div>
+          <div className="overflow-hidden">
+            <div className="text-[12px] font-bold text-white truncate">usuario_67</div>
+            <div className="text-[10px]" style={{ color: C.moss }}>🔥 racha activa</div>
           </div>
+          <Bell size={14} className="ml-auto flex-shrink-0" color="#7C93A6" />
         </div>
       )}
-
-      <nav className="flex-1 px-2.5 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-3 overflow-y-auto space-y-1 pb-2">
         {menuItems.map(({ label, Icon, color, vista, sub }) => {
           const activoDirecto = vista !== "" && vistaActual === vista;
           const activoPorSubmenu = sub.some((s) => s.vista === vistaActual);
           return (
             <div key={label}>
-              <button
-                onClick={() => {
-                  if (sub.length) setOpenMenu(openMenu === label ? null : label);
-                  else cambiarVista(vista);
-                }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-colors duration-150 text-left group"
-                style={{
-                  color: activoDirecto || activoPorSubmenu ? "#405FFA" : "#12263A",
-                  background: activoDirecto ? "rgba(64,95,250,0.10)" : "transparent",
-                }}
-                onMouseOver={(e) => {
-                  if (!activoDirecto) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
-                }}
-                onMouseOut={(e) => {
-                  if (!activoDirecto) (e.currentTarget as HTMLElement).style.background = "transparent";
-                }}
-              >
-                <Icon size={17} style={{ color: activoDirecto || activoPorSubmenu ? "#405FFA" : color, flexShrink: 0 }} />
-                {!collapsed && (
-                  <>
-                    <span className="flex-1">{label}</span>
-                    {sub.length > 0 && (
-                      <ChevronLeft
-                        size={13}
-                        style={{
-                          color: "#668EA5",
-                          transform: openMenu === label ? "rotate(-90deg)" : "rotate(-180deg)",
-                          transition: "transform .2s",
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </button>
-
-              {!collapsed && openMenu === label && sub.length > 0 && (
-                <div className="pl-9 pr-2 pb-1 space-y-0.5">
+              <NavButton
+                active={activoDirecto || activoPorSubmenu}
+                Icon={Icon}
+                label={label}
+                color={color}
+                expanded={expanded}
+                hasChevron={sub.length > 0}
+                chevronOpen={openMenu === label}
+                onClick={() => (sub.length ? setOpenMenu(openMenu === label ? null : label) : cambiarVista(vista))}
+              />
+              {expanded && openMenu === label && sub.length > 0 && (
+                <div className="pl-11 pr-2 pt-1 pb-1 space-y-0.5">
                   {sub.map((s) => {
                     const activo = vistaActual === s.vista;
                     return (
                       <button
                         key={s.vista}
                         onClick={() => cambiarVista(s.vista)}
-                        className="w-full text-left text-[12px] px-2 py-1.5 rounded-lg transition-colors"
-                        style={{
-                          color: activo ? "#405FFA" : "#668EA5",
-                          background: activo ? "rgba(64,95,250,0.10)" : "transparent",
-                          fontWeight: activo ? 700 : 500,
-                        }}
-                        onMouseOver={(e) => {
-                          if (!activo) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
-                        }}
-                        onMouseOut={(e) => {
-                          if (!activo) (e.currentTarget as HTMLElement).style.background = "transparent";
-                        }}
+                        className="w-full text-left text-[12px] px-2.5 py-1.5 rounded-lg transition-colors font-semibold whitespace-nowrap"
+                        style={{ color: activo ? color : "#8CA0B0", background: activo ? `${color}1A` : "transparent" }}
                       >
                         {s.label}
                       </button>
@@ -245,121 +178,45 @@ function SidebarDashboard({
           );
         })}
       </nav>
+    </Shell>
+  );
+}
 
-      <div className="p-2.5 space-y-0.5" style={{ borderTop: "1px solid rgba(18,38,58,0.07)" }}>
-        <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[12px] text-[#668EA5] hover:bg-black/5 transition-colors">
-          <Settings size={15} />
-          {!collapsed && <span>Configuración</span>}
-        </button>
-        <button
-          onClick={() => cambiarVista("casa")}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[12px] text-[#F8910C] hover:bg-red-50 transition-colors"
-        >
-          <LogOut size={15} />
-          {!collapsed && <span>Cerrar sesión</span>}
-        </button>
-      </div>
-    </aside>
+function SidebarPublico({ expanded, setExpanded, cambiarVista, vistaActual }: SidebarVariantProps) {
+  const navLinks = [
+    { id: "casa", label: "Inicio", Icon: Home, color: C.blue },
+    { id: "login", label: "Iniciar sesión", Icon: LogIn, color: C.turquoise },
+    { id: "registro", label: "Registrarse", Icon: UserPlus, color: C.sun },
+    { id: "acerca", label: "Acerca de", Icon: Info, color: C.mandarin },
+    { id: "contacto", label: "Contáctanos", Icon: Mail, color: C.moss },
+  ];
+  return (
+    <Shell
+      expanded={expanded}
+      setExpanded={setExpanded}
+      footer={
+        <div className="flex items-center gap-2 px-2 py-2 rounded-xl" style={{ background: "rgba(250,190,11,0.10)" }}>
+          <Sparkles size={14} color={C.sun} />
+          <span className="text-[10px] font-bold whitespace-nowrap" style={{ color: C.sun, opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>Aprende de forma interactiva</span>
+        </div>
+      }
+    >
+      <nav className="flex-1 px-3 py-2 space-y-1">
+        {navLinks.map(({ id, label, Icon, color }) => (
+          <NavButton key={id} active={vistaActual === id} Icon={Icon} label={label} color={color} expanded={expanded} onClick={() => cambiarVista(id)} />
+        ))}
+      </nav>
+    </Shell>
   );
 }
 
 export default function Sidebar({ vistaActual, cambiarVista }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const { usuario } = useAuth();
+  const autenticado = !!usuario || VISTAS_AUTENTICADAS.includes(vistaActual);
 
-  if (VISTAS_AUTENTICADAS.includes(vistaActual)) {
-    return (
-      <SidebarDashboard
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        cambiarVista={cambiarVista}
-        vistaActual={vistaActual}
-      />
-    );
+  if (autenticado) {
+    return <SidebarUsuario expanded={expanded} setExpanded={setExpanded} cambiarVista={cambiarVista} vistaActual={vistaActual} />;
   }
-
-  const navLinks = [
-    { id: "casa", label: "Casa", Icon: Home },
-    { id: "login", label: "Iniciar sesión", Icon: LogIn },
-    { id: "registro", label: "Registrarse", Icon: UserPlus },
-    { id: "contacto", label: "Contáctanos", Icon: Mail },
-  ];
-
-  return (
-    <aside
-      className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out h-screen relative"
-      style={{
-        width: collapsed ? "66px" : "240px",
-        background: "#F4EDEA",
-        borderRight: "1px solid rgba(18,38,58,0.08)",
-        fontFamily: "'Inter',sans-serif",
-      }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-3.5 min-h-[60px]">
-        {!collapsed && (
-          <div className="flex items-center gap-2 overflow-hidden">
-            <BetaLogo size={30} />
-            <div className="font-['Space_Grotesk'] text-[13px] font-bold text-[#12263A] leading-tight whitespace-nowrap">
-              BETA
-              <div className="text-[10px] font-normal text-[#668EA5]">Finanzas para jóvenes</div>
-            </div>
-          </div>
-        )}
-        {collapsed && <div className="mx-auto"><BetaLogo size={28} /></div>}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg hover:bg-black/5 text-[#668EA5] flex-shrink-0 transition-colors"
-        >
-          <ChevronLeft
-            size={15}
-            style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform .3s" }}
-          />
-        </button>
-      </div>
-
-      {/* Nav links */}
-      <nav className="flex-1 px-2.5 py-2 space-y-0.5">
-        {navLinks.map(({ id, label, Icon }) => {
-          const active = vistaActual === id;
-          return (
-            <div key={id} className="relative group">
-              <button
-                onClick={() => cambiarVista(id)}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150"
-                style={{
-                  background: active ? "#405FFA" : "transparent",
-                  color: active ? "white" : "#12263A",
-                }}
-                onMouseOver={(e) => {
-                  if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(18,38,58,0.05)";
-                }}
-                onMouseOut={(e) => {
-                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
-                }}
-              >
-                <Icon size={17} style={{ color: active ? "white" : "#668EA5", flexShrink: 0 }} />
-                {!collapsed && <span>{label}</span>}
-              </button>
-              {collapsed && (
-                <span className="absolute left-[54px] top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-semibold pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-md"
-                  style={{ background: "#12263A", color: "#FFFACB" }}>
-                  {label}
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </nav>
-
-      {!collapsed ? (
-        <div className="mx-3 mb-3 rounded-2xl overflow-hidden border border-black/5 shadow-sm" style={{ height: 160 }}>
-          <SidebarIllu />
-        </div>
-      ) : (
-        <div className="mx-1 mb-3 rounded-xl overflow-hidden bg-white/40 border border-black/5">
-          <MiniIllu />
-        </div>
-      )}
-    </aside>
-  );
+  return <SidebarPublico expanded={expanded} setExpanded={setExpanded} cambiarVista={cambiarVista} vistaActual={vistaActual} />;
 }
