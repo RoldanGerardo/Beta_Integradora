@@ -9,6 +9,8 @@ import MovimientosManager from "./Components/MovimientosManager";
 import Reportes from "./Components/Reportes";
 import AcercaDe from "./Components/AcercaDe";
 import Contacto from "./Components/Contacto";
+import Articulos from "./Components/Articulos";
+import Cuestionarios from "./Components/Cuestionarios";
 import ProximamenteVista from "./Components/ProximamenteVista";
 import AdminLayout from "./Components/AdminLayout";
 import AdminDashboard from "./admin/pages/AdminDashboard";
@@ -56,6 +58,8 @@ function AppInterno() {
       case "mensuales": return <Reportes onNavigate={setVista} filtroInicial="mensual" />;
       case "acerca": return <AcercaDe onNavigate={setVista} />;
       case "contacto": return <Contacto onNavigate={setVista} />;
+      case "articulos": return <Articulos onNavigate={setVista} />;
+      case "cuestionarios": return <Cuestionarios onNavigate={setVista} />;
       default:
         return <ProximamenteVista vista={vista} onVolver={() => setVista("dashboard")} />;
     }
