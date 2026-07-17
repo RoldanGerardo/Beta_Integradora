@@ -1,6 +1,10 @@
 import app from "./app.js";
-const PORT = 3000;
+import { verificarConexion } from "./config/db";
 
-app.listen(PORT, () => {
-    console.log(`Servidor ejecutandose en http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, async () => {
+    console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+    
+    await verificarConexion();
 });
