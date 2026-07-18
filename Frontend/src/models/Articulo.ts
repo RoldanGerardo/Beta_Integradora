@@ -9,4 +9,5 @@ export interface Articulo {
     tiempoLectura?: number;
     tags?: string[];
     destacado?: boolean;
+    imagen?: string;
 }

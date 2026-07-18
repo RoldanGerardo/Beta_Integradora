@@ -15,6 +15,7 @@ import ProximamenteVista from "./Components/ProximamenteVista";
 import AdminLayout from "./Components/AdminLayout";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import AdminUsuarios from "./admin/pages/AdminUsuarios";
+import AdminArticulos from "./admin/pages/AdminArticulos";
 
 const VISTAS_ADMIN = ["admin-dashboard", "admin-usuarios", "admin-contenido", "admin-estadisticas", "admin-configuraciones"];
 
@@ -33,6 +34,7 @@ function AppInterno() {
       switch (vistaSegura) {
         case "admin-dashboard": return <AdminDashboard />;
         case "admin-usuarios": return <AdminUsuarios />;
+        case "admin-contenido": return <AdminArticulos />;
         default:
           return <ProximamenteVista vista={vistaSegura} onVolver={() => setVista("admin-dashboard")} />;
       }

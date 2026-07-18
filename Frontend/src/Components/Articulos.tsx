@@ -69,24 +69,33 @@ function SkeletonTarjeta() {
   );
 }
 
-function Portada({ categoria, destacado = false }: { categoria?: string; destacado?: boolean }) {
+function Portada({ categoria, destacado = false, imagen }: { categoria?: string; destacado?: boolean; imagen?: string }) {
   const { color, Icon } = infoCategoria(categoria);
   return (
     <div
       className="relative flex items-center justify-center overflow-hidden flex-shrink-0"
-      style={{ height: destacado ? 220 : 136, background: `linear-gradient(135deg, ${color}35, ${color}0A)` }}
+      style={{
+        height: destacado ? 220 : 136,
+        background: imagen
+          ? `linear-gradient(135deg, ${color}35, ${color}0A), url(${imagen}) center / cover no-repeat`
+          : `linear-gradient(135deg, ${color}35, ${color}0A)`,
+      }}
     >
-      <PatternDots color={color} opacity={0.16} size={destacado ? 18 : 14} />
-      <div
-        className="absolute -right-6 -top-6 rounded-full pointer-events-none"
-        style={{ width: destacado ? 140 : 90, height: destacado ? 140 : 90, background: color, opacity: 0.12 }}
-      />
-      <div
-        className="rounded-full flex items-center justify-center border-2 relative z-10"
-        style={{ width: destacado ? 76 : 52, height: destacado ? 76 : 52, background: "white", borderColor: color, boxShadow: `0 4px 0 ${color}40` }}
-      >
-        <Icon size={destacado ? 34 : 24} color={color} strokeWidth={2.2} />
-      </div>
+      {!imagen && <PatternDots color={color} opacity={0.16} size={destacado ? 18 : 14} />}
+      {!imagen && (
+        <div
+          className="absolute -right-6 -top-6 rounded-full pointer-events-none"
+          style={{ width: destacado ? 140 : 90, height: destacado ? 140 : 90, background: color, opacity: 0.12 }}
+        />
+      )}
+      {!imagen && (
+        <div
+          className="rounded-full flex items-center justify-center border-2 relative z-10"
+          style={{ width: destacado ? 76 : 52, height: destacado ? 76 : 52, background: "white", borderColor: color, boxShadow: `0 4px 0 ${color}40` }}
+        >
+          <Icon size={destacado ? 34 : 24} color={color} strokeWidth={2.2} />
+        </div>
+      )}
     </div>
   );
 }
@@ -107,7 +116,7 @@ function TarjetaArticulo({
       onClick={onAbrir}
     >
       <div className="relative">
-        <Portada categoria={articulo.categoria} />
+        <Portada categoria={articulo.categoria} imagen={articulo.imagen} />
         <button
           onClick={(e) => { e.stopPropagation(); onGuardar(); }}
           className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-150 hover:scale-110 active:scale-95 z-10"
@@ -155,7 +164,7 @@ function VistaDetalle({
   copiado: boolean;
 }) {
   const { color, Icon } = infoCategoria(articulo.categoria);
-  const parrafos = articulo.contenido.split("\n\n").filter(Boolean);
+  const parrafos = articulo.contenido.split("\\n\\n").filter(Boolean);
 
   return (
     <div className="flex-1 overflow-y-auto min-w-0 relative" style={{ background: C.cream }} onScroll={onScroll}>
@@ -173,7 +182,7 @@ function VistaDetalle({
         </button>
 
         <div className="rounded-[32px] overflow-hidden border-[3px] mb-7" style={{ borderColor: "rgba(18,38,58,0.08)", animation: "fadeInUp .4s ease-out both" }}>
-          <Portada categoria={articulo.categoria} destacado />
+          <Portada categoria={articulo.categoria} destacado imagen={articulo.imagen} />
         </div>
 
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wide mb-3" style={{ background: `${color}1E`, color }}>
@@ -256,7 +265,7 @@ function VistaDetalle({
                   className="rounded-2xl overflow-hidden bg-white border-[3px] cursor-pointer transition-transform duration-200 hover:-translate-y-1"
                   style={{ borderColor: "rgba(18,38,58,0.08)" }}
                 >
-                  <Portada categoria={r.categoria} />
+                  <Portada categoria={r.categoria} imagen={r.imagen} />
                   <div className="p-3">
                     <h4 className="beta-clamp-2 font-bold text-[12.5px] leading-snug" style={{ color: C.navy }}>{r.titulo}</h4>
                   </div>
@@ -479,7 +488,7 @@ export default function Articulos({ onNavigate }: Props) {
                   className="group grid md:grid-cols-2 rounded-[32px] overflow-hidden bg-white border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-1"
                   style={{ borderColor: "rgba(18,38,58,0.08)", boxShadow: "0 14px 30px -18px rgba(15,33,56,0.3)" }}
                 >
-                  <Portada categoria={destacado.categoria} destacado />
+                  <Portada categoria={destacado.categoria} destacado imagen={destacado.imagen} />
                   <div className="p-6 flex flex-col justify-center gap-3">
                     <span
                       className="self-start text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide"
