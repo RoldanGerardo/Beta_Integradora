@@ -62,9 +62,6 @@ export default class Articulo {
     public setDestacado(v: boolean) { this.destacado = v; }
     public setImagen(v: string) { this.imagen = v; }
 
-    // Representación plana pensada para el frontend. Se centraliza aquí
-    // para que, cuando exista una base de datos real, el resto de la
-    // aplicación no necesite cambiar la forma en la que consume un artículo.
     public toPlano() {
         return {
             id: this.id,
