@@ -35,11 +35,16 @@ const categoriaIconos: Record<string, ElementType> = {
   Comida: Utensils, Transporte: Bus, Escuela: School, Salidas: Ticket, Ropa: Shirt,
 };
 
-// Clave de almacenamiento local para la meta de ahorro.
-// Nota: no existe tabla en la BD para esto, así que vive en localStorage
-// por navegador/usuario. El saldo que se compara SIEMPRE viene del backend.
+// ── Persistencia local de la meta de ahorro ──────────────────────
+// No existe tabla en la BD para esto (ver modelos Usuario/Movimiento),
+// por lo que se guarda en localStorage, igual que ya hace este proyecto
+// con "beta_articulos_guardados" y "beta_cuestionarios_progreso".
 const META_AHORRO_KEY = "beta_meta_ahorro";
+const PORCENTAJE_AHORRO_KEY = "beta_porcentaje_ahorro";
 const META_AHORRO_DEFAULT = 1000;
+const PORCENTAJE_DEFAULT = 20; // %
+const PORCENTAJES_SUGERIDOS = [10, 20, 30, 50];
+// ───────────────────────────────────────────────────────────────
 
 function useCountUp(valor: number, duracion = 900) {
   const [display, setDisplay] = useState(valor);
@@ -91,16 +96,29 @@ function cargarMetaGuardada(): number {
   }
 }
 
+function cargarPorcentajeGuardado(): number {
+  try {
+    const guardado = localStorage.getItem(PORCENTAJE_AHORRO_KEY);
+    const valor = guardado ? Number(guardado) : PORCENTAJE_DEFAULT;
+    return Number.isFinite(valor) && valor > 0 && valor <= 100 ? valor : PORCENTAJE_DEFAULT;
+  } catch {
+    return PORCENTAJE_DEFAULT;
+  }
+}
+
 export default function Dashboard({ onNavigate }: DashboardProps) {
   const [consejoIdx, setConsejoIdx] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
 
-  // ── Meta de ahorro (persistida en localStorage) ─────────────
+  // ── Meta de ahorro y porcentaje del saldo usado ─────────────
   const [metaAhorro, setMetaAhorro] = useState<number>(cargarMetaGuardada);
+  const [porcentajeAhorro, setPorcentajeAhorro] = useState<number>(cargarPorcentajeGuardado);
+
   const [modalMetaAbierto, setModalMetaAbierto] = useState(false);
   const [metaInput, setMetaInput] = useState<string>(String(cargarMetaGuardada()));
+  const [porcentajeInput, setPorcentajeInput] = useState<number>(cargarPorcentajeGuardado());
   const [metaErrorForm, setMetaErrorForm] = useState<string | null>(null);
   // ─────────────────────────────────────────────────────────────
 
@@ -137,9 +155,12 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const balancePositivo = balance >= 0;
 
   // ── Cálculo de la meta de ahorro ─────────────────────────────
-  // Se toma el 20% del saldo actual (ingresos - egresos, sin negativos)
+  // Se toma el X% (configurable) del saldo actual (sin negativos)
   // como el "saldo destinado" a la meta de ahorro.
-  const saldoParaMeta = useMemo(() => Math.max(0, balance) * 0.2, [balance]);
+  const saldoParaMeta = useMemo(
+    () => Math.max(0, balance) * (porcentajeAhorro / 100),
+    [balance, porcentajeAhorro]
+  );
   const saldoMetaAnim = useCountUp(saldoParaMeta);
 
   const savingPct = metaAhorro > 0
@@ -159,6 +180,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   function abrirModalMeta() {
     setMetaInput(String(metaAhorro));
+    setPorcentajeInput(porcentajeAhorro);
     setMetaErrorForm(null);
     setModalMetaAbierto(true);
   }
@@ -170,17 +192,28 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   function guardarMeta(e: FormEvent) {
     e.preventDefault();
-    const valor = Number(metaInput);
-    if (!metaInput.trim() || !Number.isFinite(valor) || valor <= 0) {
-      setMetaErrorForm("Ingresa un monto válido mayor a $0.");
+    const valorMeta = Number(metaInput);
+    const valorPorcentaje = Number(porcentajeInput);
+
+    if (!metaInput.trim() || !Number.isFinite(valorMeta) || valorMeta <= 0) {
+      setMetaErrorForm("Ingresa un monto de meta válido mayor a $0.");
       return;
     }
-    setMetaAhorro(valor);
+    if (!Number.isFinite(valorPorcentaje) || valorPorcentaje <= 0 || valorPorcentaje > 100) {
+      setMetaErrorForm("El porcentaje debe estar entre 1% y 100%.");
+      return;
+    }
+
+    setMetaAhorro(valorMeta);
+    setPorcentajeAhorro(valorPorcentaje);
+
     try {
-      localStorage.setItem(META_AHORRO_KEY, String(valor));
+      localStorage.setItem(META_AHORRO_KEY, String(valorMeta));
+      localStorage.setItem(PORCENTAJE_AHORRO_KEY, String(valorPorcentaje));
     } catch {
       /* noop */
     }
+
     setModalMetaAbierto(false);
     setMetaErrorForm(null);
   }
@@ -211,6 +244,34 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           .area-hero{grid-area:hero;} .area-tip{grid-area:tip;}
           .area-stat1{grid-area:stat1;} .area-stat2{grid-area:stat2;} .area-stat3{grid-area:stat3;}
           .area-moves{grid-area:moves;} .area-quiz{grid-area:quiz;}
+        }
+        .beta-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 8px;
+          border-radius: 999px;
+          background: rgba(18,38,58,0.1);
+          outline: none;
+        }
+        .beta-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: ${C.blue};
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(15,33,56,0.35);
+          cursor: pointer;
+        }
+        .beta-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: ${C.blue};
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(15,33,56,0.35);
+          cursor: pointer;
         }
       `}</style>
 
@@ -298,7 +359,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 <div className="h-full rounded-full transition-all duration-700" style={{ width: `${savingPct}%`, background: `linear-gradient(90deg, ${C.sun}, #FFE985)` }} />
               </div>
               <div className="flex items-center gap-1.5 mt-2 text-[10.5px] font-medium" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "'Inter',sans-serif" }}>
-                <Info size={11} /> Usamos el 20% de tu saldo actual como avance hacia esta meta
+                <Info size={11} /> Usamos el {porcentajeAhorro}% de tu saldo actual como avance hacia esta meta
               </div>
             </div>
           </div>
@@ -433,7 +494,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       </div>
 
-      {/* MODAL — editar meta de ahorro */}
+      {/* MODAL — editar meta de ahorro y porcentaje del saldo usado */}
       {modalMetaAbierto && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -465,8 +526,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               </div>
             )}
 
+            {/* Monto de la meta */}
             <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: C.slate }}>
-              Nuevo monto de meta
+              Monto de la meta
             </label>
             <input
               type="number"
@@ -476,14 +538,54 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               value={metaInput}
               onChange={(e) => setMetaInput(e.target.value)}
               placeholder="Ej. 1000"
-              className="w-full py-2.5 px-3 text-[14px] rounded-xl outline-none border-2 mb-2 transition-colors duration-150"
+              className="w-full py-2.5 px-3 text-[14px] rounded-xl outline-none border-2 mb-4 transition-colors duration-150"
               style={{ borderColor: "rgba(18,38,58,0.12)", color: C.navy, fontFamily: "'Inter',sans-serif" }}
               onFocus={(e) => (e.target.style.borderColor = C.blue)}
               onBlur={(e) => (e.target.style.borderColor = "rgba(18,38,58,0.12)")}
             />
+
+            {/* Porcentaje del saldo a usar */}
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.slate }}>
+                % de tu saldo a destinar
+              </label>
+              <span className="text-[13px] font-extrabold" style={{ color: C.blue }}>{porcentajeInput}%</span>
+            </div>
+
+            <input
+              type="range"
+              min={1}
+              max={100}
+              step={1}
+              value={porcentajeInput}
+              onChange={(e) => setPorcentajeInput(Number(e.target.value))}
+              className="beta-slider w-full mb-3"
+            />
+
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {PORCENTAJES_SUGERIDOS.map((p) => {
+                const activo = porcentajeInput === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPorcentajeInput(p)}
+                    className="px-3 py-1.5 rounded-full text-[11px] font-bold border-2 transition-all duration-150"
+                    style={{
+                      background: activo ? C.blue : "white",
+                      color: activo ? "white" : C.blue,
+                      borderColor: C.blue,
+                    }}
+                  >
+                    {p}%
+                  </button>
+                );
+              })}
+            </div>
+
             <p className="text-[11px] mb-5 flex items-start gap-1.5" style={{ color: C.slate }}>
               <Info size={13} className="flex-shrink-0 mt-0.5" />
-              Se usará el 20% de tu saldo actual (${(Math.max(0, balance) * 0.2).toFixed(2)}) como avance hacia esta meta.
+              Con {porcentajeInput}% de tu saldo actual (${Math.max(0, balance).toFixed(2)}), tendrías ${(Math.max(0, balance) * (porcentajeInput / 100)).toFixed(2)} de avance hacia tu meta.
             </p>
 
             <div className="flex justify-end gap-2">
@@ -500,7 +602,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 className="px-4 py-2 rounded-full text-[12px] font-bold text-white transition-all duration-150 hover:brightness-105 active:scale-95"
                 style={{ background: C.blue }}
               >
-                Guardar meta
+                Guardar
               </button>
             </div>
           </form>
