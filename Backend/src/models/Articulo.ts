@@ -9,6 +9,7 @@ export default class Articulo {
     private tiempoLectura: number;
     private tags: string[];
     private destacado: boolean;
+    private imagen: string;
 
     constructor(
         id: number,
@@ -20,7 +21,8 @@ export default class Articulo {
         resumen: string = "",
         tiempoLectura: number = 4,
         tags: string[] = [],
-        destacado: boolean = false
+        destacado: boolean = false,
+        imagen: string = ""
     ) {
         this.id = id;
         this.titulo = titulo;
@@ -32,6 +34,7 @@ export default class Articulo {
         this.tiempoLectura = tiempoLectura;
         this.tags = tags;
         this.destacado = destacado;
+        this.imagen = imagen;
     }
 
     public getId(): number { return this.id; }
@@ -44,4 +47,37 @@ export default class Articulo {
     public getTiempoLectura(): number { return this.tiempoLectura; }
     public getTags(): string[] { return this.tags; }
     public getDestacado(): boolean { return this.destacado; }
+    public getImagen(): string { return this.imagen; }
+
+    public setTitulo(v: string) { this.titulo = v; }
+    public setContenido(v: string) { this.contenido = v; }
+    public setFecha(v: string) { this.fecha = v; }
+    public setCategoria(v: string) { this.categoria = v; }
+    public setAutor(v: string) { this.autor = v; }
+    public setResumen(v: string) {
+        this.resumen = v && v.length > 0 ? v : this.contenido.slice(0, 140).trim() + "...";
+    }
+    public setTiempoLectura(v: number) { this.tiempoLectura = v; }
+    public setTags(v: string[]) { this.tags = v; }
+    public setDestacado(v: boolean) { this.destacado = v; }
+    public setImagen(v: string) { this.imagen = v; }
+
+    // Representación plana pensada para el frontend. Se centraliza aquí
+    // para que, cuando exista una base de datos real, el resto de la
+    // aplicación no necesite cambiar la forma en la que consume un artículo.
+    public toPlano() {
+        return {
+            id: this.id,
+            titulo: this.titulo,
+            contenido: this.contenido,
+            fecha: this.fecha,
+            categoria: this.categoria,
+            autor: this.autor,
+            resumen: this.resumen,
+            tiempoLectura: this.tiempoLectura,
+            tags: this.tags,
+            destacado: this.destacado,
+            imagen: this.imagen,
+        };
+    }
 }

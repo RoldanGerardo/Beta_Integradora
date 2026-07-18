@@ -174,7 +174,55 @@ El quinto, y quizás el más silencioso, es posponer el ahorro y la inversión "
         return this.articulos;
     }
 
+    obtenerArticuloPorId(id: number): Articulo | null {
+        return this.articulos.find((a) => a.getId() === id) ?? null;
+    }
+
     agregarArticulo(articulo: Articulo): void {
         this.articulos.push(articulo);
     }
+
+    actualizarArticulo(
+        id: number,
+        datos: Partial<{
+            titulo: string;
+            contenido: string;
+            fecha: string;
+            categoria: string;
+            autor: string;
+            resumen: string;
+            tiempoLectura: number;
+            tags: string[];
+            destacado: boolean;
+            imagen: string;
+        }>
+    ): Articulo | null {
+        const articulo = this.obtenerArticuloPorId(id);
+        if (!articulo) return null;
+
+        if (datos.titulo !== undefined) articulo.setTitulo(datos.titulo);
+        if (datos.contenido !== undefined) articulo.setContenido(datos.contenido);
+        if (datos.fecha !== undefined) articulo.setFecha(datos.fecha);
+        if (datos.categoria !== undefined) articulo.setCategoria(datos.categoria);
+        if (datos.autor !== undefined) articulo.setAutor(datos.autor);
+        if (datos.resumen !== undefined) articulo.setResumen(datos.resumen);
+        if (datos.tiempoLectura !== undefined) articulo.setTiempoLectura(datos.tiempoLectura);
+        if (datos.tags !== undefined) articulo.setTags(datos.tags);
+        if (datos.destacado !== undefined) articulo.setDestacado(datos.destacado);
+        if (datos.imagen !== undefined) articulo.setImagen(datos.imagen);
+
+        return articulo;
+    }
+
+    eliminarArticulo(id: number): boolean {
+        const existia = this.articulos.some((a) => a.getId() === id);
+        this.articulos = this.articulos.filter((a) => a.getId() !== id);
+        return existia;
+    }
 }
+
+// Instancia única compartida por toda la aplicación (mismo patrón que
+// usuarioManager y movimientoManager). Así el estado en memoria persiste
+// entre peticiones y, el día de mañana, sólo esta clase deberá cambiar
+// su implementación interna para hablar con una base de datos real.
+export const educativoManager = new EducativoManager();
