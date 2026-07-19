@@ -89,6 +89,21 @@ export class MovimientosManager {
       throw error;
     }
   }
+  // 5. Obtener TODOS los movimientos (uso exclusivo del panel de administrador)
+  async obtenerTodosLosMovimientos(): Promise<any[]> {
+    try {
+      const [rows] = await pool.query<RowDataPacket[]>(`
+        SELECT m.id_movimiento AS id, m.monto, m.descripcion, m.fecha, m.tipo, c.nombre_categoria AS categoria
+        FROM MOVIMIENTO m
+        JOIN CATEGORIA c ON m.id_categoria = c.id_categoria
+        ORDER BY m.fecha ASC
+      `);
+      return rows;
+    } catch (error) {
+      console.error("Error al obtener todos los movimientos de la DB:", error);
+      throw error;
+    }
+  }
 }
 
 export const movimientoManager = new MovimientosManager();
