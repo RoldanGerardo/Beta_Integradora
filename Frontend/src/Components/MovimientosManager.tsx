@@ -203,9 +203,14 @@ export default function MovimientosManager({ tipoVista, onNavigate }: Movimiento
           </div>
         </div>
 
-        <div>
+        {/* CATEGORÍAS — se le dio suficiente padding vertical para contener
+            el crecimiento visual (scale + box-shadow + hover) de la categoría
+            activa, ya que overflow-x-auto obliga al eje Y a comportarse como
+            no-visible también. Antes (py-1) ese crecimiento se recortaba/
+            superponía contra el contenido de abajo; ahora queda contenido. */}
+        <div className="mb-1">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-3" style={{ color: C.slate }}>Categorías</p>
-          <div className="flex gap-3 overflow-x-auto py-1 px-1">
+          <div className="flex gap-3 overflow-x-auto overflow-y-hidden py-4 px-1">
             {categorias.map((cat, i) => {
               const Icono = categoriaIconos[cat] ?? Tag;
               const activo = categoriaSeleccionada === cat;
