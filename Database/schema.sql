@@ -1,41 +1,72 @@
--- ========================================================
--- CONFIGURACIÓN INICIAL DE LA BASE DE DATOS (SQL SERVER)
--- ========================================================
+-- 1. Crear y usar la base de datos
+CREATE DATABASE IF NOT EXISTS Beta;
+USE Beta;
 
--- Crear la base de datos si no existe
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'beta_integradora_db')
-BEGIN
-    CREATE DATABASE beta_integradora_db;
-END
-GO
+-- 2. Crear tabla CATEGORIA
+CREATE TABLE CATEGORIA (
+    id_categoria INT NOT NULL AUTO_INCREMENT,
+    nombre_categoria VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(255) NULL,
+    CONSTRAINT PK_CATEGORIA PRIMARY KEY (id_categoria)
+);
 
-USE beta_integradora_db;
-GO
+-- 3. Crear tabla USUARIO
+CREATE TABLE USUARIO (
+    id_usuario INT NOT NULL AUTO_INCREMENT,
+    nombre VARCHAR(150) NOT NULL,
+    correo_electronico VARCHAR(150) NOT NULL,
+    contraseña VARCHAR(255) NOT NULL,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT PK_USUARIO PRIMARY KEY (id_usuario)
+);
 
--- 1. Tabla de Usuarios
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usuarios]') AND type in (N'U'))
-BEGIN
-    CREATE TABLE usuarios (
-        id INT IDENTITY(1,1) PRIMARY KEY,
-        nombre NVARCHAR(100) NOT NULL,
-        email NVARCHAR(100) NOT NULL UNIQUE,
-        password NVARCHAR(255) NOT NULL,
-        fecha_registro DATETIME DEFAULT GETDATE()
-    );
-END
-GO
+-- 4. Crear tabla MODULO_EDUCATIVO
+CREATE TABLE MODULO_EDUCATIVO (
+    id_modulo INT NOT NULL AUTO_INCREMENT,
+    titulo VARCHAR(150) NOT NULL,
+    contenido TEXT NOT NULL, 
+    nivel VARCHAR(50) NOT NULL,
+    CONSTRAINT PK_MODULO_EDUCATIVO PRIMARY KEY (id_modulo)
+);
 
--- 2. Tabla para Simulación de Gastos / Presupuestos
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[presupuestos]') AND type in (N'U'))
-BEGIN
-    CREATE TABLE presupuestos (
-        id INT IDENTITY(1,1) PRIMARY KEY,
-        usuario_id INT,
-        monto_limite DECIMAL(10,2) NOT NULL,
-        categoria NVARCHAR(50) NOT NULL,
-        mes_anio NVARCHAR(7) NOT NULL, -- Formato: '2026-06'
-        CONSTRAINT FK_Presupuestos_Usuarios FOREIGN KEY (usuario_id) 
-            REFERENCES usuarios(id) ON DELETE CASCADE
-    );
-END
-GO
+-- 5. Crear tabla MOVIMIENTO
+CREATE TABLE MOVIMIENTO (
+    id_movimiento INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_categoria INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL, 
+    monto DECIMAL(18,2) NOT NULL,
+    descripcion VARCHAR(255) NULL,
+    fecha DATE NOT NULL,
+    CONSTRAINT PK_MOVIMIENTO PRIMARY KEY (id_movimiento),
+    CONSTRAINT FK_MOVIMIENTO_USUARIO FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario),
+    CONSTRAINT FK_MOVIMIENTO_CATEGORIA FOREIGN KEY (id_categoria) REFERENCES CATEGORIA(id_categoria)
+);
+
+-- 6. Crear tabla REPORTE
+CREATE TABLE REPORTE (
+    id_reporte INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    tipo_reporte VARCHAR(100) NOT NULL,
+    fecha_generacion DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    total_ingresos DECIMAL(18,2) NOT NULL,
+    total_gastos DECIMAL(18,2) NOT NULL,
+    CONSTRAINT PK_REPORTE PRIMARY KEY (id_reporte),
+    CONSTRAINT FK_REPORTE_USUARIO FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+);
+
+-- 7. Crear tabla PROGRESO_EDUCATIVO
+CREATE TABLE PROGRESO_EDUCATIVO (
+    id_progreso INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_modulo INT NOT NULL,
+    completado BOOLEAN DEFAULT 0 NOT NULL, 
+    fecha_completado DATETIME NULL,
+    puntaje INT NULL,
+    CONSTRAINT PK_PROGRESO_EDUCATIVO PRIMARY KEY (id_progreso),
+    CONSTRAINT FK_PROGRESO_USUARIO FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario),
+    CONSTRAINT FK_PROGRESO_MODULO FOREIGN KEY (id_modulo) REFERENCES MODULO_EDUCATIVO(id_modulo)
+);
+
+INSERT INTO Beta.USUARIO (id_usuario, nombre, correo_electronico, contraseña, fecha_registro) 
+VALUES (1, 'Usuario de Pruebas', 'pruebas@beta.com', '123456', NOW());
