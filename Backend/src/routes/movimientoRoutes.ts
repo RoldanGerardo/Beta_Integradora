@@ -1,18 +1,42 @@
 import { Router, Request, Response } from "express";
 import { movimientoManager } from "../services/movimientosManager.js";
+import { verificarToken } from "../services/authService.js"; // <-- Importamos tu validador
 
 const router = Router();
 
-// 1. GET: Obtener movimientos (con opción de filtrar por tipo en la URL '?tipo=ingreso')
+// Función auxiliar para validar el token en cada petición HTTP
+function obtenerUsuarioAutenticado(req: Request, res: Response): number | null {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Acceso denegado. No se proporcionó un token válido." });
+    return null;
+  }
+
+  const token = authHeader.split(" ")[1];
+  const payload = verificarToken(token);
+
+  if (!payload) {
+    res.status(401).json({ error: "Token inválido o expirado." });
+    return null;
+  }
+
+  return payload.id; // Retorna el ID del usuario real extraído del token
+}
+
+// 1. GET: Obtener movimientos de forma PRIVADA
 router.get("/", async (req: Request, res: Response): Promise<any> => {
   try {
+    const id_usuario = obtenerUsuarioAutenticado(req, res);
+    if (id_usuario === null) return; // Si no hay usuario válido, la función auxiliar ya respondió 401
+
     const { tipo } = req.query;
     let resultado;
 
     if (tipo === "ingreso" || tipo === "egreso") {
-      resultado = await movimientoManager.obtenerMovimientosPorTipo(tipo);
+      resultado = await movimientoManager.obtenerMovimientosPorTipo(tipo, id_usuario);
     } else {
-      resultado = await movimientoManager.obtenerMovimientos();
+      resultado = await movimientoManager.obtenerMovimientos(id_usuario);
     } 
 
     res.status(200).json(resultado);
@@ -21,10 +45,13 @@ router.get("/", async (req: Request, res: Response): Promise<any> => {
   }
 });
 
-// 2. POST: Registrar un movimiento
+// 2. POST: Registrar un movimiento ligado al usuario real
 router.post("/", async (req: Request, res: Response): Promise<any> => {
   try {
-    const { monto, descripcion, fecha, tipo, categoria, id_usuario } = req.body;
+    const id_usuario = obtenerUsuarioAutenticado(req, res);
+    if (id_usuario === null) return;
+
+    const { monto, descripcion, fecha, tipo, categoria } = req.body;
 
     // Validación básica de campos requeridos
     if (!monto || !descripcion || !fecha || (tipo !== "ingreso" && tipo !== "egreso")) {
@@ -33,11 +60,8 @@ router.post("/", async (req: Request, res: Response): Promise<any> => {
       });
     }
 
-    // Nota temporal: Como aún no migramos el módulo de usuarios, usaremos el id_usuario enviado en el body, o por defecto el 1.
-    const usuarioId = id_usuario ? Number(id_usuario) : 1; 
-
     const nuevoId = await movimientoManager.agregarMovimiento({
-      id_usuario: usuarioId,
+      id_usuario: id_usuario, // <-- Adiós al valor temporal "1", usamos el del token
       nombre_categoria: categoria ?? "General",
       tipo,
       monto: Number(monto),
@@ -47,7 +71,7 @@ router.post("/", async (req: Request, res: Response): Promise<any> => {
 
     res.status(201).json({
       id: nuevoId,
-      id_usuario: usuarioId,
+      id_usuario: id_usuario,
       monto,
       descripcion,
       fecha,
@@ -59,14 +83,18 @@ router.post("/", async (req: Request, res: Response): Promise<any> => {
   }
 });
 
-// 3. DELETE: Eliminar un movimiento por ID
+// 3. DELETE: Eliminar un movimiento asegurando propiedad
 router.delete("/:id", async (req: Request, res: Response): Promise<any> => {
   try {
+    const id_usuario = obtenerUsuarioAutenticado(req, res);
+    if (id_usuario === null) return;
+
     const id = Number(req.params.id);
-    const existia = await movimientoManager.eliminarMovimiento(id);
+    // Le pasamos el ID del movimiento Y el ID del usuario para validar en el query
+    const existia = await movimientoManager.eliminarMovimiento(id, id_usuario);
 
     if (!existia) {
-      return res.status(404).json({ error: "Movimiento no encontrado en la base de datos" });
+      return res.status(404).json({ error: "Movimiento no encontrado o no tienes permisos para eliminarlo." });
     }
 
     res.status(200).json({ mensaje: "Movimiento eliminado correctamente de la base de datos" });

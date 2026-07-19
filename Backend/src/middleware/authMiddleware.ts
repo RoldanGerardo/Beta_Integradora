@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import { verificarToken } from "../services/authService";
-import { usuarioManager } from "../services/usuarioManager";
+import { verificarToken } from "../services/authService.js";
+import { usuarioManager } from "../services/usuarioManager.js";
 
 export interface RequestConUsuario extends Request {
   usuarioId?: number;
   usuarioRol?: string;
 }
 
-export function verificarAutenticacion(req: RequestConUsuario, res: Response, next: NextFunction) {
+export async function verificarAutenticacion(req: RequestConUsuario, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "No autenticado" });
@@ -17,7 +17,9 @@ export function verificarAutenticacion(req: RequestConUsuario, res: Response, ne
   if (!payload) {
     return res.status(401).json({ error: "Sesión inválida o expirada" });
   }
-  const usuario = usuarioManager.obtenerPorId(payload.id);
+  
+  // Ahora es asíncrono!
+  const usuario = await usuarioManager.obtenerPorId(payload.id);
   if (!usuario || !usuario.getActivo()) {
     return res.status(401).json({ error: "Usuario no válido" });
   }

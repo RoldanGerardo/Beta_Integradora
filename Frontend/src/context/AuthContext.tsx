@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { login as loginRequest, Sesion, UsuarioSesion } from "../services/authApi";
+import { login as loginRequest, register as registerRequest, Sesion, UsuarioSesion } from "../services/authApi.js";
 
 interface AuthContextValue {
   usuario: UsuarioSesion | null;
@@ -7,6 +7,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   cargando: boolean;
   iniciarSesion: (identificador: string, password: string) => Promise<UsuarioSesion>;
+  registrar: (nombre: string, email: string, password: string, username?: string) => Promise<UsuarioSesion>;
   cerrarSesion: () => void;
 }
 
@@ -36,6 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return nuevaSesion.usuario;
   };
 
+  const registrar = async (nombre: string, email: string, password: string, username?: string) => {
+    const nuevaSesion = await registerRequest(nombre, email, password, username);
+    setSesion(nuevaSesion);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nuevaSesion));
+    return nuevaSesion.usuario;
+  };
+
   const cerrarSesion = () => {
     setSesion(null);
     localStorage.removeItem(STORAGE_KEY);
@@ -49,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: sesion?.usuario?.rol === "admin",
         cargando,
         iniciarSesion,
+        registrar,
         cerrarSesion,
       }}
     >

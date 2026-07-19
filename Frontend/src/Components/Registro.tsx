@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowRight, Check } from "lucide-react";
 import BetaLogo from "./BetaLogo";
 import { CohetitoBeto } from "./Ilustraciones";
 import { C } from "./theme.ts";
+import { useAuth } from "../context/AuthContext";
 import type { CSSProperties, FormEvent } from "react";
 
 type Props = { onNavigate: (vista: string) => void };
@@ -16,6 +17,7 @@ function getPassStrength(pass: string): { label: string; pct: number; color: str
 }
 
 export default function Registro({ onNavigate }: Props) {
+  const { registrar } = useAuth();
   const [form, setForm] = useState({ nombre: "", username: "", email: "", password: "" });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,9 +25,10 @@ export default function Registro({ onNavigate }: Props) {
 
   const passInfo = getPassStrength(form.password);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+
     if (!form.nombre || !form.username || !form.email || !form.password) {
       setError("Por favor completa todos los campos.");
       return;
@@ -34,11 +37,16 @@ export default function Registro({ onNavigate }: Props) {
       setError("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await registrar(form.nombre, form.email, form.password, form.username);
       onNavigate("dashboard");
-    }, 1000);
+    } catch (err: any) {
+      setError(err.message || "Ocurrió un error al registrar tu cuenta.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

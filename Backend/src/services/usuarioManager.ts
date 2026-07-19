@@ -1,51 +1,144 @@
-import Usuario, { RolUsuario } from "../models/Usuario";
-import { hashPassword } from "./authService";
+import pool from "../config/db.js";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
+import Usuario, { RolUsuario } from "../models/Usuario.js";
+import { hashPassword } from "./authService.js";
 
-export default class UsuarioManager {
-  private usuarios: Usuario[] = [];
-  private siguienteId = 1;
+export class UsuarioManager {
 
-  constructor() {
-    // Cuenta admin sembrada para que puedas entrar de inmediato.
-    this.agregarUsuario("Administrador BETA", "admin", "admin@beta.mx", "Admin123!", "admin");
-    this.agregarUsuario("Usuario Demo", "usuario_67", "demo@beta.mx", "contraseña", "usuario");
+  // 1. Obtener todos los usuarios de la base de datos
+  async obtenerTodos(): Promise<Usuario[]> {
+    try {
+      const [rows] = await pool.query<RowDataPacket[]>(
+        "SELECT id_usuario, nombre, correo_electronico, contraseña, fecha_registro FROM USUARIO"
+      );
+      
+      return rows.map(r => new Usuario(
+        r.id_usuario,
+        r.nombre,
+        r.nombre, // Usamos el nombre como username por compatibilidad
+        r.correo_electronico,
+        r.contraseña,
+        "usuario", // Rol por defecto, se puede ampliar según tus necesidades
+        true,
+        r.fecha_registro
+      ));
+    } catch (error) {
+      console.error("Error al obtener usuarios de la DB:", error);
+      throw error;
+    }
   }
 
-  agregarUsuario(nombre: string, username: string, email: string, password: string, rol: RolUsuario = "usuario"): Usuario {
-    const nuevo = new Usuario(this.siguienteId++, nombre, username, email, hashPassword(password), rol);
-    this.usuarios.push(nuevo);
-    return nuevo;
+// 2. Obtener un usuario por su ID
+  async obtenerPorId(id: number): Promise<Usuario | null> {
+    try {
+      const [rows] = await pool.query<RowDataPacket[]>(
+        "SELECT id_usuario, nombre, correo_electronico, contraseña AS contrasenia, fecha_registro FROM USUARIO WHERE id_usuario = ?",
+        [id]
+      );
+
+      if (rows.length === 0) return null;
+
+      const r = rows[0];
+      return new Usuario(
+        r.id_usuario,
+        r.nombre,
+        r.nombre,
+        r.correo_electronico,
+        r.contrasenia, // Contraseña garantizada desde el alias
+        "usuario",
+        true,
+        r.fecha_registro
+      );
+    } catch (error) {
+      console.error("Error al obtener usuario por ID:", error);
+      throw error;
+    }
   }
 
-  obtenerTodos(): Usuario[] {
-    return this.usuarios;
+// 3. Buscar usuario para el Login (por Correo Electrónico)
+  async obtenerPorEmailOUsername(identificador: string): Promise<Usuario | null> {
+    try {
+      // Pedimos todas las variaciones posibles de nombre de columna para no fallar
+      const [rows] = await pool.query<RowDataPacket[]>(
+        "SELECT id_usuario, nombre, correo_electronico, contraseña, contraseña AS contrasenia FROM USUARIO WHERE correo_electronico = ?",
+        [identificador]
+      );
+
+      if (rows.length === 0) return null;
+
+      const r = rows[0];
+      
+      // Capturamos el hash buscando cualquier propiedad válida que devuelva MySQL
+      const hashEncontrado = r.contrasenia || r.contraseña || r.contrasena;
+
+      if (!hashEncontrado) {
+        console.error("🚨 Alerta: No se encontró la columna de contraseña en el resultado de la DB:", r);
+      }
+
+      // Forzamos la creación del objeto pasando el hash directamente
+      const usuario = new Usuario(
+        r.id_usuario,
+        r.nombre,
+        r.nombre, // username
+        r.correo_electronico,
+        hashEncontrado, // Le pasamos la contraseña recuperada de forma segura
+        "usuario",
+        true
+      );
+
+      return usuario;
+    } catch (error) {
+      console.error("Error al obtener usuario por correo:", error);
+      throw error;
+    }
   }
 
-  obtenerPorId(id: number): Usuario | undefined {
-    return this.usuarios.find((u) => u.getId() === id);
+  // 4. Agregar / Registrar un nuevo usuario de forma segura
+  async agregarUsuario(
+    nombre: string,
+    username: string,
+    email: string,
+    passwordPlana: string,
+    rol: RolUsuario = "usuario"
+  ): Promise<Usuario> {
+    try {
+      // Encriptamos la contraseña antes de guardarla en la BD
+      const passwordEncriptada = hashPassword(passwordPlana);
+
+      const [result] = await pool.query<ResultSetHeader>(
+        "INSERT INTO USUARIO (nombre, correo_electronico, contraseña) VALUES (?, ?, ?)",
+        [nombre, email, passwordEncriptada]
+      );
+
+      const nuevoId = result.insertId;
+
+      return new Usuario(
+        nuevoId,
+        nombre,
+        username,
+        email,
+        passwordEncriptada,
+        rol,
+        true
+      );
+    } catch (error) {
+      console.error("Error al registrar usuario en la DB:", error);
+      throw error;
+    }
   }
 
-  obtenerPorEmailOUsername(identificador: string): Usuario | undefined {
-    return this.usuarios.find(
-      (u) => u.getEmail() === identificador || u.getUsername() === identificador
-    );
-  }
-
-  actualizarUsuario(id: number, datos: Partial<{ nombre: string; username: string; email: string; rol: RolUsuario; activo: boolean }>): Usuario | null {
-    const usuario = this.obtenerPorId(id);
-    if (!usuario) return null;
-    if (datos.nombre !== undefined) usuario.setNombre(datos.nombre);
-    if (datos.username !== undefined) usuario.setUsername(datos.username);
-    if (datos.email !== undefined) usuario.setEmail(datos.email);
-    if (datos.rol !== undefined) usuario.setRol(datos.rol);
-    if (datos.activo !== undefined) usuario.setActivo(datos.activo);
-    return usuario;
-  }
-
-  eliminarUsuario(id: number): boolean {
-    const existia = this.usuarios.some((u) => u.getId() === id);
-    this.usuarios = this.usuarios.filter((u) => u.getId() !== id);
-    return existia;
+  // 5. Eliminar un usuario de la BD
+  async eliminarUsuario(id: number): Promise<boolean> {
+    try {
+      const [result] = await pool.query<ResultSetHeader>(
+        "DELETE FROM USUARIO WHERE id_usuario = ?",
+        [id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error("Error al eliminar usuario de la DB:", error);
+      throw error;
+    }
   }
 }
 

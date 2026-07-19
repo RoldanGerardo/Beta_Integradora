@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 const SECRET = process.env.AUTH_SECRET || "beta-dev-secret-cambiar-en-produccion";
 const EXPIRACION_MS = 8 * 60 * 60 * 1000; // 8 horas
 

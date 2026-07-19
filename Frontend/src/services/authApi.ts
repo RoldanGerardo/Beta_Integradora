@@ -101,3 +101,24 @@ export async function adminObtenerDashboard(token: string): Promise<DashboardSta
   if (!response.ok) throw new Error("No se pudo obtener el dashboard");
   return response.json();
 }
+
+// Añade esta función en tu authApi.ts
+export async function register(
+  nombre: string,
+  email: string,
+  password: string,
+  username?: string
+): Promise<Sesion> {
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre, email, password, username }),
+  });
+  
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || "No se pudo registrar el usuario");
+  }
+  
+  return response.json();
+}
