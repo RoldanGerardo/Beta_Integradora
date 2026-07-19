@@ -64,7 +64,7 @@ export default function AdminDashboard() {
                 <div key={m.id} className="flex items-center justify-between p-3 rounded-xl" style={{ background: "#F4EDEA" }}>
                   <span className="text-[13px] font-medium" style={{ color: "#12263A" }}>{m.descripcion}</span>
                   <span className="text-[12px] font-bold" style={{ color: m.tipo === "ingreso" ? "#707D4E" : "#AE6D21" }}>
-                    {m.tipo === "ingreso" ? "+" : "-"}${m.monto.toFixed(2)}
+                    {m.tipo === "ingreso" ? "+" : "-"}${Number(m.monto || 0).toFixed(2)}
                   </span>
                 </div>
               ))}
