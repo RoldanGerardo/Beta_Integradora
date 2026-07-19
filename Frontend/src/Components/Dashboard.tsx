@@ -12,6 +12,7 @@ import { obtenerMetaAhorro, guardarMetaAhorro } from "../services/metaAhorroServ
 import type { Movimiento } from "../models/Movimiento";
 import type { MetaAhorro } from "../models/MetaAhorro";
 import MetaAhorroModal from "./MetaAhorroModal";
+import { useAuth } from "../context/AuthContext";
 import { C } from "./theme.ts";
 
 type DashboardProps = {
@@ -76,6 +77,10 @@ function tiempoRelativo(fecha: string): string {
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
+  const { usuario } = useAuth();
+  const nombreMostrado = usuario?.username?.trim() || usuario?.nombre?.trim() || "Usuario";
+  const inicial = nombreMostrado.charAt(0).toUpperCase();
+
   const [consejoIdx, setConsejoIdx] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
@@ -191,7 +196,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div style={{ animation: "coinFloat 3s ease-in-out infinite" }}><BetoDashboard /></div>
           <div>
             <div className="font-['Space_Grotesk'] font-extrabold text-[14px] md:text-[15px]" style={{ color: C.navy }}>
-              ¡Bienvenido de nuevo, <span style={{ color: C.mandarin }}>usuario_67</span>!
+              ¡Bienvenido de nuevo, <span style={{ color: C.mandarin }}>{nombreMostrado}</span>!
             </div>
             <div className="flex items-center gap-1 text-[11px] font-bold" style={{ color: C.moss }}><Flame size={12} /> 5 días de racha</div>
           </div>
@@ -200,7 +205,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <button className="w-9 h-9 rounded-2xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95" style={{ background: "rgba(250,190,11,0.18)" }} title="Notificaciones">
             <span className="text-[16px]">🔔</span>
           </button>
-          <div className="w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-white text-sm" style={{ background: C.blue, boxShadow: `0 3px 0 ${C.blueDeep}` }}>U</div>
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-white text-sm" style={{ background: C.blue, boxShadow: `0 3px 0 ${C.blueDeep}` }}>{inicial}</div>
         </div>
       </header>
 
@@ -282,7 +287,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
         {/* RACHA + CONSEJO DEL DÍA — comparten el mismo espacio vertical que hero */}
         <div className="area-side">
-          <div className="relative rounded-[32px] p-5 flex flex-col justify-center items-center gap-2 border-[3px] overflow-hidden flex-shrink-0" style={{ background: C.sun, borderColor: C.navy, boxShadow: `0 6px 0 rgba(15,33,56,0.35), 0 16px 28px -12px rgba(15,33,56,0.35)`, animation: "popIn .45s ease-out .08s both" }}>
+          <div className="relative rounded-[32px] p-5 flex flex-col justify-center items-center gap-2 border-[3px] overflow-hidden flex-shrink-0" style={{ background: C.sun, borderColor: C.navy, boxShadow: `0 6px 0 rgba(15,33,58,0.35), 0 16px 28px -12px rgba(15,33,58,0.35)`, animation: "popIn .45s ease-out .08s both" }}>
             <PatternDots color="#FFFFFF" opacity={0.3} size={14} />
             <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none" style={{ background: "white", opacity: 0.14 }} />
             <div style={{ animation: "coinFloat 2.6s ease-in-out infinite" }}><Flame size={26} color={C.navy} /></div>
@@ -328,7 +333,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* STAT: INGRESOS */}
-        <div className="area-stat1 group relative rounded-[30px] p-5 flex flex-col gap-2 cursor-pointer border-[3px] overflow-hidden" style={{ background: C.mossSoft, borderColor: C.moss, boxShadow: `0 6px 0 ${C.moss}55, 0 16px 26px -10px rgba(15,33,56,0.2)`, animation: "popIn .45s ease-out .2s both" }} onClick={() => onNavigate && onNavigate("ingresos")}>
+        <div className="area-stat1 group relative rounded-[30px] p-5 flex flex-col gap-2 cursor-pointer border-[3px] overflow-hidden" style={{ background: C.mossSoft, borderColor: C.moss, boxShadow: `0 6px 0 ${C.moss}55, 0 16px 26px -10px rgba(15,33,58,0.2)`, animation: "popIn .45s ease-out .2s both" }} onClick={() => onNavigate && onNavigate("ingresos")}>
           <PatternDots color="#3D7A41" opacity={0.06} size={13} />
           <div className="flex items-center justify-between z-10">
             <div className="w-9 h-9 rounded-full flex items-center justify-center border-2 transition-transform duration-200 group-hover:scale-110" style={{ background: "white", borderColor: C.moss }}>
@@ -343,7 +348,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* STAT: BALANCE (destacado, centro, más oscuro) */}
-        <div className="area-stat2 group relative rounded-[30px] p-5 flex flex-col gap-2 justify-center border-[3px] overflow-hidden" style={{ background: errorCardBg(error), borderColor: error ? "#F87171" : C.navy, boxShadow: `0 6px 0 rgba(15,33,56,0.4), 0 16px 26px -10px rgba(15,33,56,0.3)`, animation: "popIn .45s ease-out .26s both", transform: "translateY(-6px)" }}>
+        <div className="area-stat2 group relative rounded-[30px] p-5 flex flex-col gap-2 justify-center border-[3px] overflow-hidden" style={{ background: errorCardBg(error), borderColor: error ? "#F87171" : C.navy, boxShadow: `0 6px 0 rgba(15,33,58,0.4), 0 16px 26px -10px rgba(15,33,58,0.3)`, animation: "popIn .45s ease-out .26s both", transform: "translateY(-6px)" }}>
           <PatternDots color="#FFFFFF" opacity={0.05} size={13} />
           <div className="flex items-center justify-between z-10">
             <div className="w-9 h-9 rounded-full flex items-center justify-center border-2" style={{ background: "rgba(255,255,255,0.1)", borderColor: error ? "#F87171" : C.blue }}>
@@ -362,7 +367,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* STAT: EGRESOS */}
-        <div className="area-stat3 group relative rounded-[30px] p-5 flex flex-col gap-2 cursor-pointer border-[3px] overflow-hidden" style={{ background: C.mandarinSoft, borderColor: C.mandarin, boxShadow: `0 6px 0 ${C.mandarin}55, 0 16px 26px -10px rgba(15,33,56,0.2)`, animation: "popIn .45s ease-out .32s both" }} onClick={() => onNavigate && onNavigate("egresos")}>
+        <div className="area-stat3 group relative rounded-[30px] p-5 flex flex-col gap-2 cursor-pointer border-[3px] overflow-hidden" style={{ background: C.mandarinSoft, borderColor: C.mandarin, boxShadow: `0 6px 0 ${C.mandarin}55, 0 16px 26px -10px rgba(15,33,58,0.2)`, animation: "popIn .45s ease-out .32s both" }} onClick={() => onNavigate && onNavigate("egresos")}>
           <PatternDots color="#AE6D21" opacity={0.06} size={13} />
           <div className="flex items-center justify-between z-10">
             <div className="w-9 h-9 rounded-full flex items-center justify-center border-2 transition-transform duration-200 group-hover:scale-110" style={{ background: "white", borderColor: C.mandarin }}>
@@ -377,7 +382,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* MOVIMIENTOS — timeline */}
-        <div className="area-moves relative rounded-[32px] p-6 border-[3px]" style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(10px)", borderColor: "rgba(18,38,58,0.1)", boxShadow: `0 6px 0 rgba(15,33,56,0.06), 0 16px 26px -10px rgba(15,33,56,0.14)`, animation: "popIn .45s ease-out .38s both" }}>
+        <div className="area-moves relative rounded-[32px] p-6 border-[3px]" style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(10px)", borderColor: "rgba(18,38,58,0.1)", boxShadow: `0 6px 0 rgba(15,33,58,0.06), 0 16px 26px -10px rgba(15,33,58,0.14)`, animation: "popIn .45s ease-out .38s both" }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <ArrowUpRight size={17} color={C.navy} />
@@ -423,7 +428,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* CUESTIONARIOS */}
-        <div className="area-quiz relative rounded-[32px] p-6 flex flex-col gap-3 border-[3px] overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navy} 0%, ${C.navyDeep} 100%)`, borderColor: C.navy, boxShadow: `0 6px 0 rgba(15,33,56,0.5), 0 16px 26px -10px rgba(15,33,56,0.4)`, animation: "popIn .45s ease-out .44s both" }}>
+        <div className="area-quiz relative rounded-[32px] p-6 flex flex-col gap-3 border-[3px] overflow-hidden" style={{ background: `linear-gradient(160deg, ${C.navy} 0%, ${C.navyDeep} 100%)`, borderColor: C.navy, boxShadow: `0 6px 0 rgba(15,33,58,0.5), 0 16px 26px -10px rgba(15,33,58,0.4)`, animation: "popIn .45s ease-out .44s both" }}>
           <PatternDots color="#FFFFFF" opacity={0.05} size={20} />
           <div className="flex items-center gap-2 z-10">
             <BookOpen size={17} color={C.sun} />

@@ -108,7 +108,11 @@ function SidebarUsuario({ expanded, setExpanded, cambiarVista, vistaActual }: Si
   ];
   const menuActivo = menuItems.find((m) => m.sub.some((s) => s.vista === vistaActual))?.label ?? null;
   const [openMenu, setOpenMenu] = useState<string | null>(menuActivo);
-  const { cerrarSesion } = useAuth();
+  const { usuario, cerrarSesion } = useAuth();
+
+  // Username real del usuario autenticado. Nunca un valor fijo.
+  const nombreMostrado = usuario?.username?.trim() || usuario?.nombre?.trim() || "Usuario";
+  const inicial = nombreMostrado.charAt(0).toUpperCase();
 
   return (
     <Shell
@@ -116,7 +120,10 @@ function SidebarUsuario({ expanded, setExpanded, cambiarVista, vistaActual }: Si
       setExpanded={setExpanded}
       footer={
         <>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[12px] font-semibold text-[#C7D4DE] hover:bg-white/5 transition-colors whitespace-nowrap">
+          <button
+            onClick={() => cambiarVista("configuracion")}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[12px] font-semibold text-[#C7D4DE] hover:bg-white/5 transition-colors whitespace-nowrap"
+          >
             <Settings size={15} /><span style={{ opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>Configuración</span>
           </button>
           <button
@@ -133,9 +140,9 @@ function SidebarUsuario({ expanded, setExpanded, cambiarVista, vistaActual }: Si
     >
       {expanded && (
         <div className="mx-3 mb-3 p-3 rounded-2xl flex items-center gap-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-white text-sm" style={{ background: C.blue }}>U</div>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-white text-sm" style={{ background: C.blue }}>{inicial}</div>
           <div className="overflow-hidden">
-            <div className="text-[12px] font-bold text-white truncate">usuario_67</div>
+            <div className="text-[12px] font-bold text-white truncate">{nombreMostrado}</div>
             <div className="text-[10px]" style={{ color: C.moss }}>🔥 racha activa</div>
           </div>
           <Bell size={14} className="ml-auto flex-shrink-0" color="#7C93A6" />
