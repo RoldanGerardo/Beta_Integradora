@@ -6,7 +6,7 @@ import {
   adminCrearArticulo,
   adminActualizarArticulo,
   adminEliminarArticulo,
-} from "../../services/EducativoApi";
+} from "../../services/educativoApi";
 import { Articulo } from "../../models/Articulo";
 import ConfirmModal from "../../Components/ConfirmModal";
 

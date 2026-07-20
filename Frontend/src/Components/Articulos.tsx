@@ -9,7 +9,7 @@ import {
 import { Beto, PatternDots } from "./Ilustraciones.tsx";
 import { C } from "./theme.ts";
 import { Articulo } from "../models/Articulo";
-import { obtenerArticulos } from "../services/EducativoApi.ts";
+import { obtenerArticulos } from "../services/educativoApi.ts";
 
 type Props = {
   onNavigate?: (vista: string) => void;

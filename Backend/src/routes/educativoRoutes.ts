@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
-import Articulo from "../models/Articulo";
-import { educativoManager } from "../services/educativoManager";
-import { verificarAutenticacion, requireAdmin } from "../middleware/authMiddleware";
+import { educativoManager } from "../services/educativoManager.js";
+import { verificarAutenticacion, requireAdmin } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
@@ -19,66 +18,73 @@ type DatosArticulo = {
 };
 
 // el usuario lee los articulos (público, sin autenticación)
-router.get("/", (req: Request, res: Response) => {
-    res.status(200).json(educativoManager.obtenerArticulos().map((a) => a.toPlano()));
+router.get("/", async (req: Request, res: Response) => {
+    try {
+        const articulos = await educativoManager.obtenerArticulos();
+        res.status(200).json(articulos.map((a) => a.toPlano()));
+    } catch (error) {
+        res.status(500).json({ error: "No se pudieron obtener los artículos" });
+    }
 });
 
-router.get("/:id", (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const articulo = educativoManager.obtenerArticuloPorId(id);
-    if (!articulo) return res.status(404).json({ error: "Artículo no encontrado" });
-    res.status(200).json(articulo.toPlano());
+router.get("/:id", async (req: Request, res: Response): Promise<any> => {
+    try {
+        const id = Number(req.params.id);
+        const articulo = await educativoManager.obtenerArticuloPorId(id);
+        if (!articulo) return res.status(404).json({ error: "Artículo no encontrado" });
+        res.status(200).json(articulo.toPlano());
+    } catch (error) {
+        res.status(500).json({ error: "No se pudo obtener el artículo" });
+    }
 });
 
 // a partir de aquí, sólo el administrador puede publicar, editar o eliminar
 router.use(verificarAutenticacion, requireAdmin);
 
-router.post("/", (req: Request, res: Response) => {
-    const data = req.body as DatosArticulo;
+router.post("/", async (req: Request, res: Response): Promise<any> => {
+    try {
+        const data = req.body as DatosArticulo;
 
-    if (!data.titulo || !data.contenido || !data.fecha) {
-        return res.status(400).json({
-            error: "Faltan campos obligatorios: titulo, contenido y fecha",
-        });
+        if (!data.titulo || !data.contenido || !data.fecha) {
+            return res.status(400).json({
+                error: "Faltan campos obligatorios: titulo, contenido y fecha",
+            });
+        }
+
+        const nuevoArticulo = await educativoManager.agregarArticulo(data);
+        res.status(201).json(nuevoArticulo.toPlano());
+    } catch (error) {
+        res.status(500).json({ error: "No se pudo publicar el artículo" });
     }
-
-    const nuevoArticulo = new Articulo(
-        Date.now(),
-        data.titulo,
-        data.contenido,
-        data.fecha,
-        data.categoria,
-        data.autor,
-        data.resumen,
-        data.tiempoLectura,
-        data.tags,
-        data.destacado,
-        data.imagen
-    );
-
-    educativoManager.agregarArticulo(nuevoArticulo);
-    res.status(201).json(nuevoArticulo.toPlano());
 });
 
-router.put("/:id", (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const data = req.body as Partial<DatosArticulo>;
+router.put("/:id", async (req: Request, res: Response): Promise<any> => {
+    try {
+        const id = Number(req.params.id);
+        const data = req.body as Partial<DatosArticulo>;
 
-    const actualizado = educativoManager.actualizarArticulo(id, data);
-    if (!actualizado) return res.status(404).json({ error: "Artículo no encontrado" });
+        const actualizado = await educativoManager.actualizarArticulo(id, data);
+        if (!actualizado) return res.status(404).json({ error: "Artículo no encontrado" });
 
-    res.status(200).json(actualizado.toPlano());
+        res.status(200).json(actualizado.toPlano());
+    } catch (error) {
+        res.status(500).json({ error: "No se pudo actualizar el artículo" });
+    }
 });
 
-router.delete("/:id", (req: Request, res: Response) => {
-    const id = Number(req.params.id);
-    const existia = educativoManager.eliminarArticulo(id);
+router.delete("/:id", async (req: Request, res: Response): Promise<any> => {
+    try {
+        const id = Number(req.params.id);
+        const existia = await educativoManager.eliminarArticulo(id);
 
-    if (!existia) {
-        return res.status(404).json({ error: "Artículo no encontrado" });
+        if (!existia) {
+            return res.status(404).json({ error: "Artículo no encontrado" });
+        }
+
+        res.status(200).json({ mensaje: "Artículo eliminado" });
+    } catch (error) {
+        res.status(500).json({ error: "No se pudo eliminar el artículo" });
     }
-
-    res.status(200).json({ mensaje: "Artículo eliminado" });
 });
 
 export default router;
