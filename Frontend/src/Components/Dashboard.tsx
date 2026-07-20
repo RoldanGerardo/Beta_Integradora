@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ElementType } from "react";
 import {
   Mail, HelpCircle, TrendingUp, TrendingDown, ArrowUpRight, BookOpen,
-  CheckCircle, Circle, Wallet, Loader2, Flame, Target, Sparkles, ChevronRight,
+  CheckCircle, Circle, Wallet, Loader2, Target, Sparkles, ChevronRight,
   GraduationCap, Briefcase, Gift, Tag, Utensils, Bus, School, Ticket, Shirt, Pencil,
 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
@@ -198,7 +198,6 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <div className="font-['Space_Grotesk'] font-extrabold text-[14px] md:text-[15px]" style={{ color: C.navy }}>
               ¡Bienvenido de nuevo, <span style={{ color: C.mandarin }}>{nombreMostrado}</span>!
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-bold" style={{ color: C.moss }}><Flame size={12} /> 5 días de racha</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -285,24 +284,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           )}
         </div>
 
-        {/* RACHA + CONSEJO DEL DÍA — comparten el mismo espacio vertical que hero */}
+        {/* CONSEJO DEL DÍA */}
         <div className="area-side">
-          <div className="relative rounded-[32px] p-5 flex flex-col justify-center items-center gap-2 border-[3px] overflow-hidden flex-shrink-0" style={{ background: C.sun, borderColor: C.navy, boxShadow: `0 6px 0 rgba(15,33,58,0.35), 0 16px 28px -12px rgba(15,33,58,0.35)`, animation: "popIn .45s ease-out .08s both" }}>
-            <PatternDots color="#FFFFFF" opacity={0.3} size={14} />
-            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none" style={{ background: "white", opacity: 0.14 }} />
-            <div style={{ animation: "coinFloat 2.6s ease-in-out infinite" }}><Flame size={26} color={C.navy} /></div>
-            <div className="font-['Space_Grotesk'] font-extrabold text-[22px] z-10" style={{ color: C.navy }}>5 días</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest z-10" style={{ color: "#8A5B00" }}>Racha activa 🔥</div>
-            <div className="flex items-center gap-1 z-10 mt-1">
-              {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
-                <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold border-2" title={d} style={{ background: i < 5 ? C.navy : "rgba(255,255,255,0.5)", color: i < 5 ? C.sun : "#8A5B00", borderColor: C.navy }}>
-                  {i < 5 ? <Flame size={9} /> : d}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative flex-1 rounded-[28px] p-6 flex flex-col border-[3px] overflow-hidden" style={{ background: "rgba(221,246,247,0.75)", backdropFilter: "blur(10px)", borderColor: C.turquoise, animation: "popIn .45s ease-out .14s both" }}>
+          <div className="relative flex-1 rounded-[28px] p-6 flex flex-col border-[3px] overflow-hidden min-h-[200px]" style={{ background: "rgba(221,246,247,0.75)", backdropFilter: "blur(10px)", borderColor: C.turquoise, animation: "popIn .45s ease-out .14s both" }}>
             <PatternDots color="#0E7490" opacity={0.05} size={18} />
             <div className="absolute -bottom-6 -right-6 w-28 h-28 rounded-full pointer-events-none" style={{ background: C.turquoise, opacity: 0.14 }} />
             <div className="absolute -top-8 -left-8 w-20 h-20 rounded-full pointer-events-none" style={{ background: C.turquoise, opacity: 0.08 }} />
@@ -321,7 +305,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               </p>
             </div>
 
-            <div className="flex items-center justify-between z-10">
+            <div className="flex items-center justify-between z-10 mt-auto">
               <div className="flex items-center gap-1.5">
                 {consejosDelDia.map((_, i) => (
                   <span key={i} className="rounded-full transition-all duration-300" style={{ width: i === consejoIdx ? 16 : 6, height: 6, background: i === consejoIdx ? C.turquoise : "rgba(14,116,144,0.25)" }} />
@@ -347,7 +331,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="text-[11px] font-bold z-10" style={{ color: "#3D7A41" }}>Ingresos del mes</div>
         </div>
 
-        {/* STAT: BALANCE (destacado, centro, más oscuro) */}
+        {/* STAT: BALANCE */}
         <div className="area-stat2 group relative rounded-[30px] p-5 flex flex-col gap-2 justify-center border-[3px] overflow-hidden" style={{ background: errorCardBg(error), borderColor: error ? "#F87171" : C.navy, boxShadow: `0 6px 0 rgba(15,33,58,0.4), 0 16px 26px -10px rgba(15,33,58,0.3)`, animation: "popIn .45s ease-out .26s both", transform: "translateY(-6px)" }}>
           <PatternDots color="#FFFFFF" opacity={0.05} size={13} />
           <div className="flex items-center justify-between z-10">
