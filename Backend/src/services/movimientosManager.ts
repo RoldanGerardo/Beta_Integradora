@@ -90,7 +90,7 @@ export class MovimientosManager {
     }
   }
   // 5. Obtener TODOS los movimientos (uso exclusivo del panel de administrador)
-  async obtenerTodosLosMovimientos(): Promise<any[]> {
+async obtenerTodosLosMovimientos(): Promise<any[]> {
     try {
       const [rows] = await pool.query<RowDataPacket[]>(`
         SELECT m.id_movimiento AS id, m.monto, m.descripcion, m.fecha, m.tipo, c.nombre_categoria AS categoria
@@ -104,6 +104,52 @@ export class MovimientosManager {
       throw error;
     }
   }
+
+  async obtenerResumen(fechaInicio: string, fechaFin: string, id_usuario: number) {
+    try {
+      const [movimientos] = await pool.query<RowDataPacket[]>(`
+        SELECT m.id_movimiento AS id, m.monto, m.descripcion, m.fecha, m.tipo, c.nombre_categoria AS categoria
+        FROM MOVIMIENTO m
+        JOIN CATEGORIA c ON m.id_categoria = c.id_categoria
+        WHERE m.id_usuario = ? AND m.fecha BETWEEN ? AND ?
+        ORDER BY m.fecha ASC
+      `, [id_usuario, fechaInicio, fechaFin]);
+
+      let totalIngresos = 0;
+      let totalEgresos = 0;
+      const porCategoria: Record<string, { tipo: string; total: number }> = {};
+
+      for (const m of movimientos) {
+        const monto = Number(m.monto);
+        if (m.tipo === "ingreso") totalIngresos += monto;
+        else totalEgresos += monto;
+
+        const clave = m.categoria as string;
+        if (!porCategoria[clave]) porCategoria[clave] = { tipo: m.tipo, total: 0 };
+        porCategoria[clave].total += monto;
+      }
+
+      return {
+        fechaInicio,
+        fechaFin,
+        totalIngresos,
+        totalEgresos,
+        balance: totalIngresos - totalEgresos,
+        cantidadMovimientos: movimientos.length,
+        porCategoria: Object.entries(porCategoria).map(([categoria, datos]) => ({
+          categoria,
+          tipo: datos.tipo,
+          total: datos.total,
+        })),
+        movimientos,
+      };
+    } catch (error) {
+      console.error("Error al generar el resumen de movimientos:", error);
+      throw error;
+    }
+  }
+
 }
+
 
 export const movimientoManager = new MovimientosManager();

@@ -73,6 +73,18 @@ export interface InformePeriodo {
   movimientosDelPeriodo: Movimiento[];
 }
 
+// Forma cruda en la que responde el backend (obtenerResumen en movimientosManager.ts)
+interface RespuestaInformeBackend {
+  fechaInicio: string;
+  fechaFin: string;
+  totalIngresos: number;
+  totalEgresos: number;
+  balance: number;
+  cantidadMovimientos: number;
+  porCategoria: { categoria: string; tipo: string; total: number }[];
+  movimientos: Movimiento[];
+}
+
 // 4. GET: Obtener informe financiero privado
 export async function obtenerInforme(
   inicio: string,
@@ -85,7 +97,16 @@ export async function obtenerInforme(
       headers: obtenerHeadersSeguros()
     }
   );
-  
+
   if (!response.ok) throw new Error("No se pudo obtener el informe");
-  return response.json();
+
+  const data: RespuestaInformeBackend = await response.json();
+
+  // Traducimos los nombres del backend a los que espera Reportes.tsx
+  return {
+    ingresosTotales: Number(data.totalIngresos ?? 0),
+    egresosTotales: Number(data.totalEgresos ?? 0),
+    diferencia: Number(data.balance ?? 0),
+    movimientosDelPeriodo: data.movimientos ?? [],
+  };
 }
