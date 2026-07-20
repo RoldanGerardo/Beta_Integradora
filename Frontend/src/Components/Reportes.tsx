@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
 import { obtenerInforme, InformePeriodo } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import { C } from "./theme.ts";
 
 type Props = {
@@ -72,6 +73,9 @@ export default function Reportes({ onNavigate, filtroInicial }: Props) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { usuario } = useAuth();
+  const nombreMostrado = usuario?.username?.trim() || usuario?.nombre?.trim() || "Usuario";
+
   const rango = useMemo(
     () => (filtro === "quincenal" ? obtenerRangoQuincenal() : obtenerRangoMensual()),
     [filtro]
@@ -109,12 +113,12 @@ export default function Reportes({ onNavigate, filtroInicial }: Props) {
     [movimientos]
   );
 
-  const resumenTexto = cargando
+const resumenTexto = cargando
     ? "Calculando tu resumen del periodo..."
-    : `usuario_67 gastó $${egresos.toFixed(2)} mientras que sus ingresos fueron de $${ingresos.toFixed(2)}, por lo que el usuario ha gastado ${
-        diferencia >= 0 ? "menos" : "más"
+    : `${nombreMostrado} gastó $${egresos.toFixed(2)} mientras que sus ingresos fueron de $${ingresos.toFixed(2)}, por lo que ${
+        diferencia >= 0 ? "gastó menos" : "gastó más"
       } que sus ingresos en este periodo.`;
-
+      
   const consejo =
     diferencia < 0
       ? "⚠️ Estás gastando más de lo que ingresa. Revisa tus categorías con más movimientos y recorta lo que no sea esencial."
