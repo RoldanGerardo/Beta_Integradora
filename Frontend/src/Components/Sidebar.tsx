@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Home, Mail, LogIn, UserPlus, Settings, PieChart, Info,
-  BookOpen, Activity, Bell, LogOut, Sparkles,
+  BookOpen, Activity, Bell, LogOut, Sparkles, Shield,
 } from "lucide-react";
 import BetaLogo from "./BetaLogo";
 import { useAuth } from "../context/AuthContext";
@@ -108,7 +108,7 @@ function SidebarUsuario({ expanded, setExpanded, cambiarVista, vistaActual }: Si
   ];
   const menuActivo = menuItems.find((m) => m.sub.some((s) => s.vista === vistaActual))?.label ?? null;
   const [openMenu, setOpenMenu] = useState<string | null>(menuActivo);
-  const { usuario, cerrarSesion } = useAuth();
+  const { usuario, isAdmin, cerrarSesion } = useAuth();
 
   // Username real del usuario autenticado. Nunca un valor fijo.
   const nombreMostrado = usuario?.username?.trim() || usuario?.nombre?.trim() || "Usuario";
@@ -148,6 +148,22 @@ function SidebarUsuario({ expanded, setExpanded, cambiarVista, vistaActual }: Si
           <Bell size={14} className="ml-auto flex-shrink-0" color="#7C93A6" />
         </div>
       )}
+
+      {isAdmin && (
+        <button
+          onClick={() => cambiarVista("admin-dashboard")}
+          className="mx-3 mb-3 flex items-center gap-3 px-3 py-2.5 rounded-2xl text-[13px] font-bold whitespace-nowrap transition-all duration-150 hover:brightness-110"
+          style={{ background: "rgba(250,190,11,0.14)", border: `1.5px solid ${C.sun}55` }}
+        >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: C.sun }}>
+            <Shield size={17} color={C.navy} strokeWidth={2.3} />
+          </div>
+          <span style={{ color: C.sun, opacity: expanded ? 1 : 0, transition: "opacity .2s" }}>
+            Panel de administrador
+          </span>
+        </button>
+      )}
+
       <nav className="flex-1 px-3 overflow-y-auto space-y-1 pb-2">
         {menuItems.map(({ label, Icon, color, vista, sub }) => {
           const activoDirecto = vista !== "" && vistaActual === vista;
