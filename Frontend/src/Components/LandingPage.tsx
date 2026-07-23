@@ -68,7 +68,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
         <div className="relative z-10 grid lg:grid-cols-[1.1fr_0.9fr] gap-6 items-center max-w-7xl mx-auto">
           <div style={{ animation: "fadeInUp .55s ease-out both" }}>
             <div className="flex flex-wrap gap-2.5 mb-6">
-              <Sticker bg={C.sun} rotate={-4}>🔥 racha de logros</Sticker>
+
               <Sticker bg={C.moss} rotate={3}>100% gratis</Sticker>
             </div>
             <h1 className="font-['Space_Grotesk'] font-extrabold leading-[1.02] mb-4" style={{ fontSize: "clamp(38px,4.6vw,60px)", color: C.navy, maxWidth: 560, letterSpacing: "-0.02em" }}>
