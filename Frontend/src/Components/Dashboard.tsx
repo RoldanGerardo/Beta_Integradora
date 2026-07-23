@@ -323,7 +323,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <div className="w-9 h-9 rounded-full flex items-center justify-center border-2 transition-transform duration-200 group-hover:scale-110" style={{ background: "white", borderColor: C.moss }}>
               <TrendingUp size={17} color="#3D7A41" />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(132,209,117,0.35)", color: "#3D7A41" }}>+12%</span>
+            
           </div>
           <div className="text-[20px] font-extrabold z-10 tabular-nums" style={{ color: C.navy, fontFamily: "'JetBrains Mono','Space Mono',ui-monospace,monospace" }}>
             {cargando ? <Loader2 size={18} className="animate-spin" /> : formatMonto(ingresosAnim)}
@@ -357,7 +357,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <div className="w-9 h-9 rounded-full flex items-center justify-center border-2 transition-transform duration-200 group-hover:scale-110" style={{ background: "white", borderColor: C.mandarin }}>
               <TrendingDown size={17} color="#AE6D21" />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(248,145,12,0.22)", color: "#AE6D21" }}>-8%</span>
+            
           </div>
           <div className="text-[20px] font-extrabold z-10 tabular-nums" style={{ color: C.navy, fontFamily: "'JetBrains Mono','Space Mono',ui-monospace,monospace" }}>
             {cargando ? <Loader2 size={18} className="animate-spin" /> : formatMonto(egresosAnim)}
